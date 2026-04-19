@@ -22,7 +22,6 @@ button{font-family:inherit;cursor:pointer}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
 .card{background:#fff;border:0.5px solid #e5e5e5;border-radius:12px;padding:1rem;cursor:pointer;transition:box-shadow 0.15s}
 .card:hover{box-shadow:0 2px 12px rgba(0,0,0,0.08)}
-.avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;color:#333;flex-shrink:0}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.42);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem;overflow-y:auto}
 .modal{background:#fff;border-radius:16px;border:0.5px solid #e5e5e5;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;padding:1.5rem;margin:auto}
 .field{margin-bottom:14px}
@@ -41,6 +40,11 @@ button{font-family:inherit;cursor:pointer}
 @keyframes spin{to{transform:rotate(360deg)}}
 .spin{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.5);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px}
 #loading{position:fixed;inset:0;background:#f7f7f5;z-index:999;display:flex;align-items:center;justify-content:center;gap:12px;font-size:14px;color:#777}
+.photo-btn{width:80px;height:80px;border-radius:50%;border:2px dashed #ddd;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;flex-shrink:0;background:#fafafa}
+.photo-btn:hover{border-color:#1D9E75}
+.code-box{background:#f0faf5;border:1px dashed #1D9E75;border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.wa-btn{display:inline-flex;align-items:center;gap:6px;background:#25D366;color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:500;text-decoration:none;margin-top:6px}
+.ox-grid{display:grid;grid-template-columns:1fr 80px 90px;gap:8px;align-items:end;margin-top:8px}
 </style>
 </head>
 <body>
@@ -77,9 +81,9 @@ button{font-family:inherit;cursor:pointer}
         </select>
       </div>
       <div id="code-field" class="field hidden">
-        <label>Código de acesso profissional</label>
-        <input id="r-code" placeholder="Solicite o código à proprietária"/>
-        <p style="font-size:11px;color:#aaa;margin-top:4px">Necessário para perfil de profissional</p>
+        <label>Código de acesso</label>
+        <input id="r-code" placeholder="Cole o código da profissional"/>
+        <p style="font-size:11px;color:#aaa;margin-top:4px">Auxiliar: solicite o código à profissional. Profissional: use SALAOPRO2025</p>
       </div>
       <p id="r-err" class="hidden" style="font-size:12px;color:#D85A30;text-align:center;margin-bottom:8px"></p>
       <button class="btn-p" id="btn-reg" style="width:100%;padding:11px 0;font-size:14px" onclick="doRegister()">Criar conta</button>
@@ -104,39 +108,75 @@ button{font-family:inherit;cursor:pointer}
     <button onclick="showTab('alertas',this)">Alertas <span id="alert-badge" class="hidden" style="background:#D85A30;color:#fff;border-radius:99px;font-size:10px;padding:1px 6px;margin-left:4px"></span></button>
     <button id="nav-nova" onclick="showTab('nova',this)">Nova cliente</button>
     <button id="nav-cores" onclick="showTab('cores',this)">Cores</button>
+    <button id="nav-cfg" onclick="showTab('config',this)">Configurações</button>
   </div>
   <div class="content">
+
     <div id="tab-clientes">
       <div id="readonly-msg" class="hidden" style="background:#E6F1FB;color:#185FA5;font-size:12px;padding:7px 12px;border-radius:8px;margin-bottom:12px">Modo visualização — você pode ver mas não editar</div>
       <input id="search" placeholder="Buscar por nome ou telefone..." oninput="renderClients()" style="margin-bottom:14px"/>
       <div id="client-grid" class="grid"></div>
     </div>
+
     <div id="tab-alertas" class="hidden"></div>
+
     <div id="tab-nova" class="hidden">
       <p style="font-size:13px;color:#888;margin-bottom:16px">Cadastrar nova cliente</p>
-      <div class="g2">
-        <div class="field"><label>Nome completo</label><input id="nc-nome"/></div>
-        <div class="field"><label>Telefone</label><input id="nc-tel" placeholder="(11) 99999-9999"/></div>
+      <div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:12px">
+        <div>
+          <div class="photo-btn" onclick="document.getElementById('photo-inp').click()">
+            <img id="photo-prev" src="" class="hidden" style="width:80px;height:80px;object-fit:cover;border-radius:50%"/>
+            <div id="photo-ph">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="#ccc"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+              <p style="font-size:10px;color:#bbb;margin-top:2px">Foto</p>
+            </div>
+          </div>
+          <input type="file" id="photo-inp" accept="image/*" class="hidden" onchange="previewPhoto(this)"/>
+        </div>
+        <div style="flex:1">
+          <div class="g2">
+            <div class="field"><label>Nome completo</label><input id="nc-nome"/></div>
+            <div class="field"><label>Telefone (com DDD)</label><input id="nc-tel" placeholder="11999999999"/></div>
+          </div>
+          <div class="g2">
+            <div class="field"><label>Nascimento</label><input id="nc-nasc" type="date"/></div>
+            <div class="field"><label>E-mail</label><input id="nc-email" type="email"/></div>
+          </div>
+        </div>
       </div>
-      <div class="g2">
-        <div class="field"><label>Nascimento</label><input id="nc-nasc" type="date"/></div>
-        <div class="field"><label>E-mail</label><input id="nc-email" type="email"/></div>
-      </div>
-      <div class="field"><label>Observações</label><textarea id="nc-obs" style="height:80px;resize:vertical" placeholder="Alergias, preferências..."></textarea></div>
+      <div class="field"><label>Observações</label><textarea id="nc-obs" style="height:70px;resize:vertical" placeholder="Alergias, preferências..."></textarea></div>
       <button class="btn-p" style="width:100%;padding:11px 0;font-size:14px" onclick="saveNewClient()">Cadastrar cliente</button>
       <p id="nc-msg" class="hidden" style="color:#0F6E56;font-size:13px;margin-top:10px"></p>
     </div>
+
     <div id="tab-cores" class="hidden">
       <p style="font-size:13px;color:#888;margin-bottom:12px">Cores e produtos do salão</p>
       <div id="cores-list"></div>
       <div style="display:flex;gap:8px;margin-top:10px">
-        <input id="nova-cor" placeholder="Nova cor ou produto..." style="flex:1"/>
+        <input id="nova-cor" placeholder="Nova cor ou produto..." style="flex:1" onkeydown="if(event.key==='Enter')addCor()"/>
         <button class="btn-s" onclick="addCor()">Adicionar</button>
       </div>
+    </div>
+
+    <div id="tab-config" class="hidden">
+      <p style="font-size:15px;font-weight:500;color:#111;margin-bottom:16px">Configurações</p>
+      <p style="font-size:13px;color:#777;margin-bottom:10px">Código de acesso para auxiliares</p>
+      <div class="code-box">
+        <div>
+          <p style="font-size:11px;color:#888;margin-bottom:6px">Compartilhe com suas auxiliares para elas criarem conta</p>
+          <p id="code-display" style="font-size:22px;font-weight:700;color:#1D9E75;letter-spacing:4px">—</p>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <button class="btn-s" onclick="copyCode()" style="font-size:12px;padding:6px 12px">Copiar</button>
+          <button class="btn-s" onclick="genCode()" style="font-size:12px;padding:6px 12px">Novo</button>
+        </div>
+      </div>
+      <p style="font-size:12px;color:#aaa">Gere um novo código sempre que quiser revogar o acesso de futuras auxiliares.</p>
     </div>
   </div>
 </div>
 
+<!-- Modal cliente -->
 <div id="modal-client" class="overlay hidden" onclick="if(event.target===this)closeModal('modal-client')">
   <div class="modal">
     <div id="modal-client-body"></div>
@@ -147,21 +187,47 @@ button{font-family:inherit;cursor:pointer}
   </div>
 </div>
 
+<!-- Modal sessão -->
 <div id="modal-session" class="overlay hidden" onclick="if(event.target===this)closeModal('modal-session')">
   <div class="modal">
-    <h3 style="font-size:16px;font-weight:500;margin-bottom:16px">Registrar sessão</h3>
+    <h3 style="font-size:16px;font-weight:500;margin-bottom:16px">Registrar sessão de coloração</h3>
     <div class="field"><label>Data</label><input id="sess-date" type="date"/></div>
-    <div class="field"><label>Cores usadas</label>
+    <div class="field">
+      <label>Cores usadas</label>
       <div style="border:0.5px solid #ddd;border-radius:10px;padding:12px">
-        <div id="sess-tags" style="display:flex;flex-wrap:wrap;gap:5px;min-height:30px;margin-bottom:10px"></div>
+        <div id="sess-tags" style="display:flex;flex-wrap:wrap;gap:5px;min-height:28px;margin-bottom:10px"></div>
         <div style="display:flex;gap:8px">
-          <input id="sess-col-inp" list="cat-list" placeholder="Cor ou produto..." style="flex:1" onkeydown="if(event.key==='Enter')addSessColor()"/>
+          <input id="sess-col-inp" list="cat-list" placeholder="Digite a cor..." style="flex:1" onkeydown="if(event.key==='Enter')addSessColor()"/>
           <datalist id="cat-list"></datalist>
           <button class="btn-s" onclick="addSessColor()">+</button>
         </div>
       </div>
     </div>
-    <div class="field"><label>Observações</label><textarea id="sess-notes" style="height:80px;resize:vertical" placeholder="Técnica, resultado..."></textarea></div>
+    <div class="field">
+      <label>Oxidante(s)</label>
+      <div style="border:0.5px solid #ddd;border-radius:10px;padding:12px">
+        <div id="ox-tags" style="display:flex;flex-wrap:wrap;gap:5px;min-height:28px;margin-bottom:8px"></div>
+        <div class="ox-grid">
+          <div>
+            <label style="font-size:11px;color:#aaa;margin-bottom:3px;display:block">Oxidante</label>
+            <select id="ox-name" style="font-size:13px">
+              <option value="">Selecione...</option>
+              <option>Ox 10vol</option><option>Ox 20vol</option><option>Ox 30vol</option><option>Ox 40vol</option><option>Outro</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px;color:#aaa;margin-bottom:3px;display:block">Volumagem</label>
+            <input id="ox-vol" placeholder="ex: 30" style="font-size:13px"/>
+          </div>
+          <div>
+            <label style="font-size:11px;color:#aaa;margin-bottom:3px;display:block">Quantidade</label>
+            <input id="ox-qty" placeholder="ex: 60ml" style="font-size:13px"/>
+          </div>
+        </div>
+        <button class="btn-s" onclick="addOx()" style="font-size:12px;padding:6px 14px;margin-top:10px">+ Adicionar</button>
+      </div>
+    </div>
+    <div class="field"><label>Observações</label><textarea id="sess-notes" style="height:70px;resize:vertical" placeholder="Técnica, resultado, próxima visita..."></textarea></div>
     <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
       <button class="btn-s" onclick="closeModal('modal-session')">Cancelar</button>
       <button class="btn-p" onclick="saveSession()">Salvar sessão</button>
@@ -176,10 +242,9 @@ import{getFirestore,collection,doc,addDoc,updateDoc,onSnapshot,setDoc,getDoc}fro
 
 const cfg={apiKey:"AIzaSyD7iOpPes0e60ColfnhulRkg-QKHlDg-iY",authDomain:"salao-pro-17519.firebaseapp.com",projectId:"salao-pro-17519",storageBucket:"salao-pro-17519.firebasestorage.app",messagingSenderId:"771780855688",appId:"1:771780855688:web:5cc873be37269a7d379c3d"};
 const PRO_CODE="SALAOPRO2025";
-const fbApp=initializeApp(cfg);
-const auth=getAuth(fbApp);
-const db=getFirestore(fbApp);
-
+const fb=initializeApp(cfg);
+const auth=getAuth(fb);
+const db=getFirestore(fb);
 const PL=["#9FE1CB","#B5D4F4","#F5C4B3","#FAC775","#C0DD97","#F4C0D1","#CECBF6","#D3D1C7"];
 const ps=n=>{const bg=PL[n.length%PL.length];return`background:${bg}33;color:#2C2C2A;border:1px solid ${bg};border-radius:99px;padding:2px 10px;font-size:12px;display:inline-block`;};
 const avBg=n=>PL[n.charCodeAt(0)%PL.length];
@@ -190,73 +255,95 @@ const fmt=d=>{if(!d)return"—";const[y,m,dd]=d.split("-");return`${dd}/${m}/${y
 const isBd=nasc=>{if(!nasc)return false;const d=new Date(nasc+"T00:00:00"),t=new Date();return d.getDate()===t.getDate()&&d.getMonth()===t.getMonth();};
 const lS=c=>c.sessions&&c.sessions.length?[...c.sessions].sort((a,b)=>b.date.localeCompare(a.date))[0]:null;
 const $=id=>document.getElementById(id);
+const cleanTel=t=>(t||"").replace(/\D/g,"");
 
-let cUser=null,cRole=null,clients=[],catalog=[],selC=null,sCols=[],unsubC=null,unsubK=null;
+let cUser=null,cRole=null,clients=[],catalog=[],selC=null,sCols=[],sOxs=[],auxCode="",photoB64=null,unsubC=null,unsubK=null;
 
 onAuthStateChanged(auth,async fu=>{
-  if(fu){
-    const sn=await getDoc(doc(db,"users",fu.uid));
-    if(sn.exists()){cUser=fu;cRole=sn.data().role;showApp();}
-    else{await signOut(auth);showLogin();}
-  }else{showLogin();}
+  if(fu){const sn=await getDoc(doc(db,"users",fu.uid));if(sn.exists()){cUser=fu;cRole=sn.data().role;showApp();}else{await signOut(auth);showLogin();}}
+  else showLogin();
 });
 
 function showLogin(){$("loading").classList.add("hidden");$("main-screen").classList.add("hidden");$("login-screen").classList.remove("hidden");}
+
 function showApp(){
   $("loading").classList.add("hidden");$("login-screen").classList.add("hidden");$("main-screen").classList.remove("hidden");
   const ip=cRole==="pro";
   const b=$("role-badge");b.textContent=ip?"Profissional":"Auxiliar";b.style.background=ip?"#E1F5EE":"#E6F1FB";b.style.color=ip?"#0F6E56":"#185FA5";
-  $("nav-nova").style.display=ip?"":"none";$("nav-cores").style.display=ip?"":"none";
+  $("nav-nova").style.display=ip?"":"none";$("nav-cores").style.display=ip?"":"none";$("nav-cfg").style.display=ip?"":"none";
   if(!ip)$("readonly-msg").classList.remove("hidden");
+  if(ip)loadCode();
   subData();
 }
 
 window.toggleForm=reg=>{$("form-login").classList.toggle("hidden",reg);$("form-reg").classList.toggle("hidden",!reg);};
-window.toggleCodeField=()=>{$("code-field").classList.toggle("hidden",$("r-role").value!=="pro");};
+window.toggleCodeField=()=>{$("code-field").classList.toggle("hidden",$("r-role").value==="aux"?false:true);};
 
 window.doLogin=async()=>{
   const email=$("l-email").value.trim(),pass=$("l-pass").value,err=$("l-err"),btn=$("btn-login");
   if(!email||!pass){err.textContent="Preencha e-mail e senha";err.classList.remove("hidden");return;}
   btn.innerHTML='<span class="spin"></span>Entrando...';btn.disabled=true;
   try{await signInWithEmailAndPassword(auth,email,pass);err.classList.add("hidden");}
-  catch(e){err.textContent=e.code==="auth/invalid-credential"?"E-mail ou senha incorretos":"Erro ao entrar. Tente novamente.";err.classList.remove("hidden");}
+  catch(e){err.textContent=e.code==="auth/invalid-credential"?"E-mail ou senha incorretos":"Erro ao entrar.";err.classList.remove("hidden");}
   btn.innerHTML="Entrar";btn.disabled=false;
 };
 
 window.doRegister=async()=>{
-  const nome=$("r-nome").value.trim(),email=$("r-email").value.trim(),pass=$("r-pass").value,role=$("r-role").value,code=$("r-code").value.trim(),err=$("r-err"),btn=$("btn-reg");
+  const nome=$("r-nome").value.trim(),email=$("r-email").value.trim(),pass=$("r-pass").value,role=$("r-role").value,code=$("r-code").value.trim().toUpperCase(),err=$("r-err"),btn=$("btn-reg");
   if(!nome||!email||!pass){err.textContent="Preencha todos os campos";err.classList.remove("hidden");return;}
   if(pass.length<6){err.textContent="Senha deve ter ao menos 6 caracteres";err.classList.remove("hidden");return;}
-  if(role==="pro"&&code!==PRO_CODE){err.textContent="Código de acesso profissional inválido";err.classList.remove("hidden");return;}
+  if(role==="aux"){
+    const sn=await getDoc(doc(db,"settings","auxCode"));
+    if(!sn.exists()||code!==sn.data().code){err.textContent="Código inválido. Solicite o código à profissional.";err.classList.remove("hidden");return;}
+  }
+  if(role==="pro"&&code!==PRO_CODE){err.textContent="Código de profissional inválido.";err.classList.remove("hidden");return;}
   btn.innerHTML='<span class="spin"></span>Criando conta...';btn.disabled=true;
   try{const cr=await createUserWithEmailAndPassword(auth,email,pass);await setDoc(doc(db,"users",cr.user.uid),{nome,email,role});err.classList.add("hidden");}
   catch(e){err.textContent=e.code==="auth/email-already-in-use"?"E-mail já cadastrado":"Erro ao criar conta.";err.classList.remove("hidden");}
   btn.innerHTML="Criar conta";btn.disabled=false;
 };
 
-window.doLogout=async()=>{if(unsubC)unsubC();if(unsubK)unsubK();clients=[];catalog=[];await signOut(auth);};
+window.doLogout=async()=>{if(unsubC)unsubC();if(unsubK)unsubK();await signOut(auth);};
+
+async function loadCode(){
+  const sn=await getDoc(doc(db,"settings","auxCode"));
+  if(sn.exists()){auxCode=sn.data().code;$("code-display").textContent=auxCode;}
+  else genCode();
+}
+
+window.genCode=async()=>{
+  const ch="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let c="";for(let i=0;i<8;i++)c+=ch[Math.floor(Math.random()*ch.length)];
+  await setDoc(doc(db,"settings","auxCode"),{code:c});
+  auxCode=c;$("code-display").textContent=c;
+};
+
+window.copyCode=()=>navigator.clipboard.writeText(auxCode).then(()=>alert("Código copiado!"));
 
 function subData(){
   unsubC=onSnapshot(collection(db,"clients"),sn=>{clients=sn.docs.map(d=>({id:d.id,...d.data()}));renderClients();renderAlerts();});
   unsubK=onSnapshot(doc(db,"catalog","items"),sn=>{catalog=sn.exists()?(sn.data().list||[]):[];renderCores();updCat();});
 }
 
-window.showTab=(id,btn)=>{["clientes","alertas","nova","cores"].forEach(t=>$("tab-"+t).classList.add("hidden"));document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));$("tab-"+id).classList.remove("hidden");btn.classList.add("active");};
+window.showTab=(id,btn)=>{["clientes","alertas","nova","cores","config"].forEach(t=>$("tab-"+t).classList.add("hidden"));document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));$("tab-"+id).classList.remove("hidden");btn.classList.add("active");};
+
+window.previewPhoto=inp=>{
+  const f=inp.files[0];if(!f)return;
+  const r=new FileReader();r.onload=e=>{photoB64=e.target.result;$("photo-prev").src=photoB64;$("photo-prev").classList.remove("hidden");$("photo-ph").classList.add("hidden");};r.readAsDataURL(f);
+};
 
 window.renderClients=()=>{
   const q=($("search").value||"").toLowerCase(),grid=$("client-grid");
-  const fl=clients.filter(c=>c.nome.toLowerCase().includes(q)||c.tel.includes(q));
+  const fl=clients.filter(c=>c.nome.toLowerCase().includes(q)||(c.tel||"").includes(q));
   if(!fl.length){grid.innerHTML='<p style="text-align:center;color:#bbb;padding:3rem 0;font-size:13px">Nenhuma cliente encontrada</p>';return;}
   grid.innerHTML=fl.map(c=>{
     const l=lS(c),days=l?dBet(l.date,tStr()):999,inactive=days>=30,bday=isBd(c.nasc);
     const bl=inactive?"3px solid #D85A30":bday?"3px solid #BA7517":"0.5px solid #e5e5e5";
     const bc=inactive?"#F09595":bday?"#FAC775":"#e5e5e5";
     const pills=(l?l.colors.slice(0,3):[]).map(col=>`<span style="${ps(col)}">${col}</span>`).join("");
+    const av=c.photo?`<img src="${c.photo}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0"/>`:`<div style="width:40px;height:40px;border-radius:50%;background:${avBg(c.nome)}33;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;color:#333;flex-shrink:0">${ini(c.nome)}</div>`;
     return`<div class="card" style="border:0.5px solid ${bc};border-left:${bl}" onclick="openClient('${c.id}')">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-        <div class="avatar" style="background:${avBg(c.nome)}33">${ini(c.nome)}</div>
-        <div><div style="font-size:14px;font-weight:500;color:#111">${c.nome}</div><div style="font-size:12px;color:#888">${c.tel}</div></div>
-      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">${av}<div><div style="font-size:14px;font-weight:500;color:#111">${c.nome}</div><div style="font-size:12px;color:#888">${c.tel||""}</div></div></div>
       <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">${pills}</div>
       <div style="font-size:11px;color:#bbb">${l?`Última sessão: ${fmt(l.date)} (${days} dias)`:"Sem sessões"}</div>
     </div>`;
@@ -269,12 +356,26 @@ window.renderAlerts=()=>{
   cnt>0?(badge.textContent=cnt,badge.classList.remove("hidden")):badge.classList.add("hidden");
   let h="";
   if(!bd.length&&!ia.length)h='<p style="text-align:center;color:#bbb;padding:3rem 0;font-size:13px">Nenhum alerta no momento ✓</p>';
-  if(bd.length){h+=`<p style="font-size:13px;font-weight:500;margin-bottom:8px;color:#111">Aniversariantes hoje</p>`;h+=bd.map(c=>`<div class="alert-bday"><div class="dot" style="background:#BA7517"></div><div><b style="color:#633806;font-size:13px">${c.nome}</b><br><span style="font-size:12px;color:#854F0B">Aniversário hoje — ${fmt(c.nasc)}</span></div></div>`).join("");}
-  if(ia.length){h+=`<p style="font-size:13px;font-weight:500;margin-bottom:8px;margin-top:${bd.length?16:0}px;color:#111">Clientes inativas (+30 dias)</p>`;h+=ia.map(c=>{const l=lS(c),days=l?dBet(l.date,today):null;return`<div class="alert-inactive"><div class="dot" style="background:#993C1D"></div><div><b style="color:#4A1B0C;font-size:13px">${c.nome}</b><br><span style="font-size:12px;color:#712B13">Última visita: ${l?fmt(l.date):"nunca"}${days!==null?` (${days} dias)`:""}</span></div></div>`;}).join("");}
+  if(bd.length){
+    h+=`<p style="font-size:13px;font-weight:500;margin-bottom:8px;color:#111">Aniversariantes hoje</p>`;
+    h+=bd.map(c=>`<div class="alert-bday"><div class="dot" style="background:#BA7517"></div><div><b style="color:#633806;font-size:13px">${c.nome}</b><br><span style="font-size:12px;color:#854F0B">Aniversário hoje — ${fmt(c.nasc)}</span></div></div>`).join("");
+  }
+  if(ia.length){
+    h+=`<p style="font-size:13px;font-weight:500;margin-bottom:8px;margin-top:${bd.length?16:0}px;color:#111">Clientes inativas (+30 dias)</p>`;
+    h+=ia.map(c=>{
+      const l=lS(c),days=l?dBet(l.date,today):null,tel=cleanTel(c.tel);
+      const msg=encodeURIComponent(`Olá ${c.nome.split(" ")[0]}! 😊 Sentimos sua falta no salão. Que tal agendar um horário? Temos novidades te esperando! 💇‍♀️`);
+      const wa=tel?`<a href="https://wa.me/55${tel}?text=${msg}" target="_blank" class="wa-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.109.549 4.09 1.504 5.813L.057 23.057l5.408-1.418A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.809 9.809 0 0 1-5.002-1.368l-.359-.214-3.21.842.857-3.131-.234-.372A9.818 9.818 0 0 1 2.182 12c0-5.42 4.398-9.818 9.818-9.818 5.42 0 9.818 4.398 9.818 9.818 0 5.42-4.398 9.818-9.818 9.818z"/></svg> Enviar WhatsApp</a>`:`<span style="font-size:11px;color:#aaa">Sem telefone cadastrado</span>`;
+      return`<div class="alert-inactive"><div class="dot" style="background:#993C1D"></div><div style="flex:1"><b style="color:#4A1B0C;font-size:13px">${c.nome}</b><br><span style="font-size:12px;color:#712B13">Última visita: ${l?fmt(l.date):"nunca"}${days!==null?` (${days} dias)`:""}</span><div style="margin-top:6px">${wa}</div></div></div>`;
+    }).join("");
+  }
   $("tab-alertas").innerHTML=h;
 };
 
-window.renderCores=()=>{const ip=cRole==="pro";$("cores-list").innerHTML=catalog.map((cor,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;background:#f5f5f5;border-radius:8px;padding:7px 12px;margin-bottom:5px"><span style="${ps(cor)}">${cor}</span>${ip?`<button class="btn-d" onclick="removeCor(${i})">Remover</button>`:""}</div>`).join("");};
+window.renderCores=()=>{
+  const ip=cRole==="pro";
+  $("cores-list").innerHTML=catalog.map((cor,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;background:#f5f5f5;border-radius:8px;padding:7px 12px;margin-bottom:5px"><span style="${ps(cor)}">${cor}</span>${ip?`<button class="btn-d" onclick="removeCor(${i})">Remover</button>`:""}</div>`).join("");
+};
 window.addCor=async()=>{const inp=$("nova-cor"),v=inp.value.trim();if(!v||catalog.includes(v))return;await setDoc(doc(db,"catalog","items"),{list:[...catalog,v]});inp.value="";};
 window.removeCor=async i=>{await setDoc(doc(db,"catalog","items"),{list:catalog.filter((_,idx)=>idx!==i)});};
 window.updCat=()=>{$("cat-list").innerHTML=catalog.map(c=>`<option value="${c}">`).join("");};
@@ -282,13 +383,16 @@ window.updCat=()=>{$("cat-list").innerHTML=catalog.map(c=>`<option value="${c}">
 window.openClient=id=>{
   selC=clients.find(c=>c.id===id);if(!selC)return;
   const l=lS(selC),days=l?dBet(l.date,tStr()):null;
-  const ac=[...new Set((selC.sessions||[]).flatMap(s=>s.colors))];
+  const ac=[...new Set((selC.sessions||[]).flatMap(s=>s.colors||[]))];
   const bb=isBd(selC.nasc)?`<span style="font-size:11px;padding:2px 10px;border-radius:99px;background:#FAEEDA;color:#633806;margin-left:8px">Aniversário hoje!</span>`:"";
-  const hist=[...(selC.sessions||[])].sort((a,b)=>b.date.localeCompare(a.date)).map(s=>`<div class="sess-item"><span style="font-size:13px;font-weight:500">${fmt(s.date)}</span><div style="display:flex;flex-wrap:wrap;gap:4px;margin:6px 0 4px">${s.colors.map(col=>`<span style="${ps(col)}">${col}</span>`).join("")}</div>${s.notes?`<p style="font-size:12px;color:#888;margin:0">${s.notes}</p>`:""}</div>`).join("");
+  const av=selC.photo?`<img src="${selC.photo}" style="width:56px;height:56px;border-radius:50%;object-fit:cover;flex-shrink:0"/>`:`<div style="width:56px;height:56px;border-radius:50%;background:${avBg(selC.nome)}33;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:20px;color:#333;flex-shrink:0">${ini(selC.nome)}</div>`;
+  const hist=[...(selC.sessions||[])].sort((a,b)=>b.date.localeCompare(a.date)).map(s=>{
+    const oxHtml=(s.oxidantes||[]).map(o=>`<span style="background:#E6F1FB;color:#185FA5;border-radius:99px;padding:2px 8px;font-size:11px;display:inline-block">${o.nome}${o.volume?" · "+o.volume+"vol":""}${o.qty?" · "+o.qty:""}</span>`).join(" ");
+    return`<div class="sess-item"><span style="font-size:13px;font-weight:500">${fmt(s.date)}</span><div style="display:flex;flex-wrap:wrap;gap:4px;margin:6px 0 4px">${(s.colors||[]).map(col=>`<span style="${ps(col)}">${col}</span>`).join("")}</div>${oxHtml?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px">${oxHtml}</div>`:""} ${s.notes?`<p style="font-size:12px;color:#888;margin:0">${s.notes}</p>`:""}</div>`;
+  }).join("");
   $("modal-client-body").innerHTML=`
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-      <div class="avatar" style="width:48px;height:48px;font-size:17px;background:${avBg(selC.nome)}33">${ini(selC.nome)}</div>
-      <div><h3 style="font-size:17px;font-weight:500;margin:0;display:flex;align-items:center;flex-wrap:wrap;gap:6px">${selC.nome}${bb}</h3><p style="font-size:13px;color:#888;margin:0">${selC.tel}${selC.email?" · "+selC.email:""}</p></div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">${av}
+      <div><h3 style="font-size:17px;font-weight:500;margin:0;display:flex;align-items:center;flex-wrap:wrap;gap:6px">${selC.nome}${bb}</h3><p style="font-size:13px;color:#888;margin:0">${selC.tel||""}${selC.email?" · "+selC.email:""}</p></div>
     </div>
     <div class="g2" style="margin-bottom:14px">
       <div class="meta-box"><div class="meta-lbl">Nascimento</div><div class="meta-val">${selC.nasc?fmt(selC.nasc):"—"}</div></div>
@@ -304,23 +408,40 @@ window.openClient=id=>{
 
 window.closeModal=id=>$(id).classList.add("hidden");
 
-window.openSession=()=>{$("sess-date").value=tStr();$("sess-notes").value="";$("sess-col-inp").value="";sCols=[];renderST();$("modal-session").classList.remove("hidden");};
+window.openSession=()=>{
+  $("sess-date").value=tStr();$("sess-notes").value="";$("sess-col-inp").value="";
+  $("ox-name").value="";$("ox-vol").value="";$("ox-qty").value="";
+  sCols=[];sOxs=[];renderST();renderOxT();
+  $("modal-session").classList.remove("hidden");
+};
 window.addSessColor=()=>{const inp=$("sess-col-inp"),v=inp.value.trim();if(v&&!sCols.includes(v)){sCols.push(v);renderST();}inp.value="";};
 window.removeSC=i=>{sCols.splice(i,1);renderST();};
-window.renderST=()=>{$("sess-tags").innerHTML=sCols.map((col,i)=>`<span style="${ps(col)};display:inline-flex;align-items:center;gap:4px">${col}<button onclick="removeSC(${i})" style="background:none;border:none;cursor:pointer;font-size:15px;line-height:1;padding:0;color:#888">×</button></span>`).join("");};
+window.renderST=()=>{$("sess-tags").innerHTML=sCols.map((col,i)=>`<span style="${ps(col)};display:inline-flex;align-items:center;gap:4px">${col}<button onclick="removeSC(${i})" style="background:none;border:none;cursor:pointer;font-size:15px;padding:0;color:#888">×</button></span>`).join("");};
+window.addOx=()=>{
+  const nome=$("ox-name").value,vol=$("ox-vol").value.trim(),qty=$("ox-qty").value.trim();
+  if(!nome){alert("Selecione o oxidante");return;}
+  sOxs.push({nome,volume:vol,qty});
+  $("ox-name").value="";$("ox-vol").value="";$("ox-qty").value="";
+  renderOxT();
+};
+window.removeOx=i=>{sOxs.splice(i,1);renderOxT();};
+window.renderOxT=()=>{$("ox-tags").innerHTML=sOxs.map((o,i)=>`<span style="background:#E6F1FB;color:#185FA5;border-radius:99px;padding:2px 10px;font-size:12px;display:inline-flex;align-items:center;gap:4px">${o.nome}${o.volume?" · "+o.volume+"vol":""}${o.qty?" · "+o.qty:""}<button onclick="removeOx(${i})" style="background:none;border:none;cursor:pointer;font-size:14px;padding:0;color:#888">×</button></span>`).join("");};
 
 window.saveSession=async()=>{
   const date=$("sess-date").value,notes=$("sess-notes").value.trim();
   if(!date||!sCols.length){alert("Informe a data e ao menos uma cor");return;}
-  await updateDoc(doc(db,"clients",selC.id),{sessions:[...(selC.sessions||[]),{date,colors:[...sCols],notes}]});
+  await updateDoc(doc(db,"clients",selC.id),{sessions:[...(selC.sessions||[]),{date,colors:[...sCols],oxidantes:[...sOxs],notes}]});
   closeModal("modal-session");closeModal("modal-client");
 };
 
 window.saveNewClient=async()=>{
   const nome=$("nc-nome").value.trim(),tel=$("nc-tel").value.trim(),nasc=$("nc-nasc").value,email=$("nc-email").value.trim(),obs=$("nc-obs").value.trim();
   if(!nome||!tel){alert("Nome e telefone são obrigatórios");return;}
-  await addDoc(collection(db,"clients"),{nome,tel,nasc,email,obs,sessions:[]});
+  const data={nome,tel,nasc,email,obs,sessions:[]};
+  if(photoB64)data.photo=photoB64;
+  await addDoc(collection(db,"clients"),data);
   ["nc-nome","nc-tel","nc-nasc","nc-email","nc-obs"].forEach(id=>$(id).value="");
+  photoB64=null;$("photo-prev").classList.add("hidden");$("photo-ph").classList.remove("hidden");
   const msg=$("nc-msg");msg.textContent=`"${nome}" cadastrada com sucesso!`;msg.classList.remove("hidden");setTimeout(()=>msg.classList.add("hidden"),3000);
 };
 </script>
