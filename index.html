@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Salão Pro</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#f7f7f5;min-height:100vh}
+input,textarea,select{font-family:inherit;font-size:14px;border:0.5px solid #ddd;border-radius:8px;padding:8px 12px;outline:none;background:#fff;width:100%}
+input:focus,textarea:focus{border-color:#1D9E75}
+button{font-family:inherit;cursor:pointer}
+.btn-p{padding:9px 20px;background:#1D9E75;border:none;color:#fff;border-radius:9px;font-size:13px;font-weight:600}
+.btn-s{padding:9px 16px;background:transparent;border:0.5px solid #ddd;border-radius:9px;font-size:13px;color:#555}
+.btn-d{padding:4px 10px;background:transparent;border:0.5px solid #ffaaaa;border-radius:6px;font-size:12px;color:#993C1D}
+.topbar{background:#fff;border-bottom:0.5px solid #e5e5e5;padding:0.7rem 1.2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.nav{background:#fff;border-bottom:0.5px solid #e5e5e5;display:flex;overflow-x:auto}
+.nav button{padding:11px 18px;font-size:13px;background:none;border:none;border-bottom:2px solid transparent;color:#888;cursor:pointer;white-space:nowrap;font-family:inherit}
+.nav button.active{color:#1D9E75;border-bottom-color:#1D9E75;font-weight:500}
+.content{padding:1.2rem;max-width:900px;margin:0 auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.card{background:#fff;border:0.5px solid #e5e5e5;border-radius:12px;padding:1rem;cursor:pointer}
+.card:hover{box-shadow:0 2px 12px rgba(0,0,0,0.08)}
+.avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;color:#333;flex-shrink:0}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.42);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem}
+.modal{background:#fff;border-radius:16px;border:0.5px solid #e5e5e5;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;padding:1.5rem}
+.field{margin-bottom:14px}
+.field label{font-size:13px;color:#777;display:block;margin-bottom:4px}
+.meta-box{background:#f5f5f5;border-radius:8px;padding:8px 12px}
+.meta-box .lbl{font-size:11px;color:#aaa;margin-bottom:2px}
+.meta-box .val{font-size:13px;font-weight:500}
+.pill{border-radius:99px;padding:2px 10px;font-size:12px;display:inline-block}
+.alert-bday{background:#FAEEDA;border-radius:8px;padding:10px 14px;margin-bottom:8px;display:flex;gap:10px}
+.alert-inactive{background:#FAECE7;border-radius:8px;padding:10px 14px;margin-bottom:8px;display:flex;gap:10px}
+.dot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.sess-item{background:#f7f7f7;border-radius:10px;padding:10px 14px;margin-bottom:10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.hidden{display:none}
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:1rem}
+.login-card{background:#fff;border:0.5px solid #e5e5e5;border-radius:20px;padding:2.5rem 2rem;width:100%;max-width:340px;box-shadow:0 2px 24px rgba(0,0,0,0.07)}
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-card">
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="width:56px;height:56px;border-radius:50%;background:#1D9E75;display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="white"><path d="M9 11.75a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5zm6 0a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8 0-.3.02-.58.05-.87 2.36-1.04 4.23-2.97 5.21-5.36C11.07 8.33 13.05 9.5 15.2 10c.96.23 1.97.32 3 .2.06.26.1.53.12.8H18c0 4.41-3.59 8-6 8z"/></svg>
+      </div>
+      <h1 style="font-size:22px;font-weight:700;color:#111">Salão Pro</h1>
+      <p style="font-size:13px;color:#888;margin-top:4px">Gestão de coloração capilar</p>
+    </div>
+    <div class="field"><label>Usuário</label><input id="login-u" placeholder="Digite seu usuário" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+    <div class="field"><label>Senha</label><input id="login-p" type="password" placeholder="Digite sua senha" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+    <p id="login-err" style="font-size:12px;color:#D85A30;text-align:center;margin-bottom:8px;display:none"></p>
+    <button class="btn-p" style="width:100%;padding:11px 0;font-size:14px" onclick="doLogin()">Entrar</button>
+    <p style="font-size:11px;color:#ccc;text-align:center;margin-top:14px">Pro: <b>profissional</b> / <b>123456</b><br>Aux: <b>auxiliar</b> / <b>auxiliar</b></p>
+  </div>
+</div>
+
+<div id="main-screen" class="hidden">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="width:34px;height:34px;border-radius:50%;background:#1D9E75;display:flex;align-items:center;justify-content:center">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="white"><path d="M9 11.75a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5zm6 0a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8 0-.3.02-.58.05-.87 2.36-1.04 4.23-2.97 5.21-5.36C11.07 8.33 13.05 9.5 15.2 10c.96.23 1.97.32 3 .2.06.26.1.53.12.8H18c0 4.41-3.59 8-6 8z"/></svg>
+      </div>
+      <span style="font-size:16px;font-weight:600;color:#111">Salão Pro</span>
+      <span id="role-badge" style="font-size:11px;padding:3px 10px;border-radius:99px;font-weight:500"></span>
+    </div>
+    <button class="btn-s" style="font-size:12px;padding:5px 14px" onclick="doLogout()">Sair</button>
+  </div>
+  <div class="nav" id="main-nav">
+    <button class="active" onclick="showTab('clientes',this)">Clientes</button>
+    <button onclick="showTab('alertas',this)">Alertas <span id="alert-badge" style="display:none;margin-left:4px;background:#D85A30;color:#fff;border-radius:99px;font-size:10px;padding:1px 6px"></span></button>
+    <button id="nav-nova" onclick="showTab('nova',this)">Nova cliente</button>
+    <button id="nav-cores" onclick="showTab('cores',this)">Cores</button>
+  </div>
+  <div class="content">
+    <div id="tab-clientes">
+      <div id="readonly-msg" style="display:none;background:#E6F1FB;color:#185FA5;font-size:12px;padding:7px 12px;border-radius:8px;margin-bottom:12px">Modo visualização — você pode ver mas não editar</div>
+      <input id="search" placeholder="Buscar por nome ou telefone..." oninput="renderClients()" style="margin-bottom:14px"/>
+      <div id="client-grid" class="grid"></div>
+    </div>
+    <div id="tab-alertas" class="hidden"></div>
+    <div id="tab-nova" class="hidden">
+      <p style="font-size:13px;color:#888;margin-bottom:16px">Cadastrar nova cliente</p>
+      <div class="grid2">
+        <div class="field"><label>Nome completo</label><input id="nc-nome"/></div>
+        <div class="field"><label>Telefone</label><input id="nc-tel" placeholder="(11) 99999-9999"/></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label>Nascimento</label><input id="nc-nasc" type="date"/></div>
+        <div class="field"><label>E-mail</label><input id="nc-email" type="email"/></div>
+      </div>
+      <div class="field"><label>Observações</label><textarea id="nc-obs" style="height:80px;resize:vertical" placeholder="Alergias, preferências..."></textarea></div>
+      <button class="btn-p" style="width:100%;padding:11px 0;font-size:14px" onclick="saveNewClient()">Cadastrar cliente</button>
+      <p id="nc-msg" style="display:none;color:#0F6E56;font-size:13px;margin-top:10px"></p>
+    </div>
+    <div id="tab-cores" class="hidden">
+      <p style="font-size:13px;color:#888;margin-bottom:12px">Cores e produtos do salão</p>
+      <div id="cores-list"></div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <input id="nova-cor" placeholder="Nova cor ou produto..." style="flex:1"/>
+        <button class="btn-s" onclick="addCor()">+</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="modal-client" class="overlay hidden" onclick="if(event.target===this)closeModal('modal-client')">
+  <div class="modal">
+    <div id="modal-client-body"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
+      <button class="btn-s" onclick="closeModal('modal-client')">Fechar</button>
+      <button class="btn-p" id="btn-add-sess" onclick="openSession()">+ Sessão</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-session" class="overlay hidden" onclick="if(event.target===this)closeModal('modal-session')">
+  <div class="modal">
+    <h3 style="font-size:16px;font-weight:500;margin-bottom:16px">Registrar sessão</h3>
+    <div class="field"><label>Data</label><input id="sess-date" type="date"/></div>
+    <div class="field">
+      <label>Cores usadas</label>
+      <div style="border:0.5px solid #ddd;border-radius:10px;padding:12px">
+        <div id="sess-colors-tags" style="display:flex;flex-wrap:wrap;gap:5px;min-height:30px;margin-bottom:10px"></div>
+        <div style="display:flex;gap:8px">
+          <input id="sess-color-input" list="cat-list" placeholder="Cor ou produto..." style="flex:1" onkeydown="if(event.key==='Enter')addSessColor()"/>
+          <datalist id="cat-list"></datalist>
+          <button class="btn-s" onclick="addSessColor()">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="field"><label>Observações</label><textarea id="sess-notes" style="height:80px;resize:vertical" placeholder="Técnica, resultado..."></textarea></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
+      <button class="btn-s" onclick="closeModal('modal-session')">Cancelar</button>
+      <button class="btn-p" onclick="saveSession()">Salvar sessão</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const USERS={profissional:{pass:"123456",role:"pro"},auxiliar:{pass:"auxiliar",role:"aux"}};
+const SC=[
+  {id:1,nome:"Ana Paula Silva",tel:"(11) 98765-4321",email:"ana@email.com",nasc:"1990-03-15",obs:"Alergia a amônia",sessions:[{date:"2024-12-10",colors:["Louro 8.0","Ox 20vol"],notes:"Iluminação frontal"},{date:"2025-01-15",colors:["Louro 8.0","Tônico violeta"],notes:"Retoque + tônico"}]},
+  {id:2,nome:"Carla Mendes",tel:"(11) 91234-5678",email:"",nasc:"1985-07-22",obs:"",sessions:[{date:"2025-02-20",colors:["Castanho 5.0","Ox 30vol"],notes:"Coloração completa"}]},
+  {id:3,nome:"Fernanda Costa",tel:"(11) 99876-5432",email:"",nasc:"1993-04-16",obs:"Cabelo sensibilizado",sessions:[{date:"2024-11-05",colors:["Ruivo 7.44","Ox 20vol"],notes:"Primeiro ruivo"}]},
+  {id:4,nome:"Juliana Rocha",tel:"(11) 97654-3210",email:"",nasc:"1988-12-30",obs:"",sessions:[]},
+];
+const SK=["Louro 8.0","Louro 9.1 Cinza","Castanho 5.0","Castanho Dourado 4.3","Ruivo 7.44","Ox 10vol","Ox 20vol","Ox 30vol","Tônico violeta","Máscara matizadora"];
+const PL=["#9FE1CB","#B5D4F4","#F5C4B3","#FAC775","#C0DD97","#F4C0D1","#CECBF6","#D3D1C7"];
+const plStyle=n=>{const bg=PL[n.length%PL.length];return`background:${bg}33;color:#2C2C2A;border:1px solid ${bg};border-radius:99px;padding:2px 10px;font-size:12px;display:inline-block`;};
+const avBg=n=>PL[n.charCodeAt(0)%PL.length];
+const ini=n=>{const p=n.trim().split(" ");return p.length>=2?p[0][0]+p[1][0]:p[0].slice(0,2);};
+const tStr=()=>new Date().toISOString().split("T")[0];
+const dBetween=(d1,d2)=>Math.floor((new Date(d2)-new Date(d1))/86400000);
+const fmt=d=>{if(!d)return"—";const[y,m,dd]=d.split("-");return`${dd}/${m}/${y}`;};
+const isBday=nasc=>{if(!nasc)return false;const d=new Date(nasc+"T00:00:00"),t=new Date();return d.getDate()===t.getDate()&&d.getMonth()===t.getMonth();};
+const lSess=c=>c.sessions.length?[...c.sessions].sort((a,b)=>b.date.localeCompare(a.date))[0]:null;
+const ldLS=(k,def)=>{try{const d=localStorage.getItem(k);return d?JSON.parse(d):def;}catch{return def;}};
+const svLS=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
+
+let user=null,clients=[],catalog=[],selClient=null,sessCols=[];
+
+function init(){clients=ldLS("sp_c",SC);catalog=ldLS("sp_k",SK);}
+
+function doLogin(){
+  const u=document.getElementById("login-u").value.trim().toLowerCase();
+  const p=document.getElementById("login-p").value;
+  const err=document.getElementById("login-err");
+  const um=USERS[u];
+  if(um&&um.pass===p){
+    user={username:u,...um};
+    err.style.display="none";
+    document.getElementById("login-screen").style.display="none";
+    document.getElementById("main-screen").classList.remove("hidden");
+    const badge=document.getElementById("role-badge");
+    badge.textContent=user.role==="pro"?"Profissional":"Auxiliar";
+    badge.style.background=user.role==="pro"?"#E1F5EE":"#E6F1FB";
+    badge.style.color=user.role==="pro"?"#0F6E56":"#185FA5";
+    document.getElementById("nav-nova").style.display=user.role==="pro"?"":"none";
+    document.getElementById("nav-cores").style.display=user.role==="pro"?"":"none";
+    if(user.role!=="pro")document.getElementById("readonly-msg").style.display="block";
+    renderClients();renderAlerts();renderCores();updateCatList();
+  }else{err.textContent="Usuário ou senha incorretos";err.style.display="block";}
+}
+
+function doLogout(){
+  user=null;
+  document.getElementById("main-screen").classList.add("hidden");
+  document.getElementById("login-screen").style.display="flex";
+  document.getElementById("login-u").value="";
+  document.getElementById("login-p").value="";
+}
+
+function showTab(id,btn){
+  ["clientes","alertas","nova","cores"].forEach(t=>document.getElementById("tab-"+t).classList.add("hidden"));
+  document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
+  document.getElementById("tab-"+id).classList.remove("hidden");
+  btn.classList.add("active");
+}
+
+function renderClients(){
+  const q=(document.getElementById("search").value||"").toLowerCase();
+  const grid=document.getElementById("client-grid");
+  const filtered=clients.filter(c=>c.nome.toLowerCase().includes(q)||c.tel.includes(q));
+  if(!filtered.length){grid.innerHTML='<p style="text-align:center;color:#bbb;padding:3rem 0;font-size:13px">Nenhuma cliente encontrada</p>';return;}
+  grid.innerHTML=filtered.map(c=>{
+    const l=lSess(c);const days=l?dBetween(l.date,tStr()):999;
+    const inactive=days>=30;const bday=isBday(c.nasc);
+    const borderLeft=inactive?"3px solid #D85A30":bday?"3px solid #BA7517":"0.5px solid #e5e5e5";
+    const borderColor=inactive?"#F09595":bday?"#FAC775":"#e5e5e5";
+    const pills=(l?l.colors.slice(0,3):[]).map(col=>`<span style="${plStyle(col)}">${col}</span>`).join("");
+    return`<div class="card" style="border:0.5px solid ${borderColor};border-left:${borderLeft}" onclick="openClient(${c.id})">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <div class="avatar" style="background:${avBg(c.nome)}33">${ini(c.nome)}</div>
+        <div><div style="font-size:14px;font-weight:500;color:#111">${c.nome}</div><div style="font-size:12px;color:#888">${c.tel}</div></div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">${pills}</div>
+      <div style="font-size:11px;color:#bbb">${l?`Última sessão: ${fmt(l.date)} (${days} dias)`:"Sem sessões"}</div>
+    </div>`;
+  }).join("");
+}
+
+function renderAlerts(){
+  const today=tStr();
+  const bdayList=clients.filter(c=>isBday(c.nasc));
+  const inactiveList=clients.filter(c=>{const l=lSess(c);return l?dBetween(l.date,today)>=30:true;});
+  const count=bdayList.length+inactiveList.length;
+  const badge=document.getElementById("alert-badge");
+  if(count>0){badge.textContent=count;badge.style.display="inline";}else{badge.style.display="none";}
+  let html="";
+  if(!bdayList.length&&!inactiveList.length){html='<p style="text-align:center;color:#bbb;padding:3rem 0;font-size:13px">Nenhum alerta no momento ✓</p>';}
+  if(bdayList.length){
+    html+=`<p style="font-size:13px;font-weight:500;margin-bottom:8px;color:#111">Aniversariantes hoje</p>`;
+    html+=bdayList.map(c=>`<div class="alert-bday"><div class="dot" style="background:#BA7517"></div><div><b style="color:#633806;font-size:13px">${c.nome}</b><br><span style="font-size:12px;color:#854F0B">Aniversário hoje — ${fmt(c.nasc)}</span></div></div>`).join("");
+  }
+  if(inactiveList.length){
+    html+=`<p style="font-size:13px;font-weight:500;margin-bottom:8px;margin-top:${bdayList.length?16:0}px;color:#111">Clientes inativas (+30 dias)</p>`;
+    html+=inactiveList.map(c=>{const l=lSess(c);const days=l?dBetween(l.date,today):null;return`<div class="alert-inactive"><div class="dot" style="background:#993C1D"></div><div><b style="color:#4A1B0C;font-size:13px">${c.nome}</b><br><span style="font-size:12px;color:#712B13">Última visita: ${l?fmt(l.date):"nunca"}${days!==null?` (${days} dias)`:""}</span></div></div>`;}).join("");
+  }
+  document.getElementById("tab-alertas").innerHTML=html;
+}
+
+function renderCores(){
+  const list=document.getElementById("cores-list");
+  list.innerHTML=catalog.map((cor,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;background:#f5f5f5;border-radius:8px;padding:7px 12px;margin-bottom:5px"><span style="${plStyle(cor)}">${cor}</span>${user&&user.role==="pro"?`<button class="btn-d" onclick="removeCor(${i})">Remover</button>`:""}</div>`).join("");
+}
+
+function addCor(){
+  const inp=document.getElementById("nova-cor");
+  const v=inp.value.trim();
+  if(!v||catalog.includes(v))return;
+  catalog.push(v);svLS("sp_k",catalog);inp.value="";renderCores();updateCatList();
+}
+
+function removeCor(i){catalog.splice(i,1);svLS("sp_k",catalog);renderCores();updateCatList();}
+
+function updateCatList(){
+  document.getElementById("cat-list").innerHTML=catalog.map(c=>`<option value="${c}">`).join("");
+}
+
+function openClient(id){
+  selClient=clients.find(c=>c.id===id);
+  if(!selClient)return;
+  const l=lSess(selClient);
+  const days=l?dBetween(l.date,tStr()):null;
+  const allColors=[...new Set(selClient.sessions.flatMap(s=>s.colors))];
+  const bdayBadge=isBday(selClient.nasc)?`<span style="font-size:11px;padding:2px 10px;border-radius:99px;background:#FAEEDA;color:#633806;margin-left:8px">Aniversário hoje!</span>`:"";
+  const colorPills=allColors.map(col=>`<span style="${plStyle(col)}">${col}</span>`).join("");
+  const history=[...selClient.sessions].sort((a,b)=>b.date.localeCompare(a.date)).map(s=>`
+    <div class="sess-item">
+      <span style="font-size:13px;font-weight:500">${fmt(s.date)}</span>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin:6px 0 4px">${s.colors.map(col=>`<span style="${plStyle(col)}">${col}</span>`).join("")}</div>
+      ${s.notes?`<p style="font-size:12px;color:#888;margin:0">${s.notes}</p>`:""}
+    </div>`).join("");
+  document.getElementById("modal-client-body").innerHTML=`
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+      <div class="avatar" style="width:48px;height:48px;font-size:17px;background:${avBg(selClient.nome)}33">${ini(selClient.nome)}</div>
+      <div><h3 style="font-size:17px;font-weight:500;margin:0">${selClient.nome}${bdayBadge}</h3><p style="font-size:13px;color:#888;margin:0">${selClient.tel}${selClient.email?" · "+selClient.email:""}</p></div>
+    </div>
+    <div class="grid2" style="margin-bottom:14px">
+      <div class="meta-box"><div class="lbl">Nascimento</div><div class="val">${selClient.nasc?fmt(selClient.nasc):"—"}</div></div>
+      <div class="meta-box"><div class="lbl">Última sessão</div><div class="val">${l?`${fmt(l.date)} (${days}d)`:"Sem sessões"}</div></div>
+    </div>
+    ${selClient.obs?`<div style="background:#f5f5f5;border-radius:8px;padding:8px 12px;margin-bottom:14px;font-size:12px;color:#777">Obs: ${selClient.obs}</div>`:""}
+    ${allColors.length?`<p style="font-size:11px;font-weight:500;color:#aaa;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">Cores já utilizadas</p><div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:16px">${colorPills}</div>`:""}
+    <p style="font-size:11px;font-weight:500;color:#aaa;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">Histórico de sessões</p>
+    ${history||'<p style="font-size:13px;color:#bbb">Sem sessões registradas</p>'}
+  `;
+  document.getElementById("btn-add-sess").style.display=user&&user.role==="pro"?"":"none";
+  document.getElementById("modal-client").classList.remove("hidden");
+}
+
+function closeModal(id){document.getElementById(id).classList.add("hidden");}
+
+function openSession(){
+  document.getElementById("sess-date").value=tStr();
+  document.getElementById("sess-notes").value="";
+  document.getElementById("sess-color-input").value="";
+  sessCols=[];renderSessCols();
+  document.getElementById("modal-session").classList.remove("hidden");
+}
+
+function addSessColor(){
+  const inp=document.getElementById("sess-color-input");
+  const v=inp.value.trim();
+  if(v&&!sessCols.includes(v)){sessCols.push(v);renderSessCols();}
+  inp.value="";
+}
+
+function removeSessCol(i){sessCols.splice(i,1);renderSessCols();}
+
+function renderSessCols(){
+  document.getElementById("sess-colors-tags").innerHTML=sessCols.map((col,i)=>`<span style="${plStyle(col)};display:inline-flex;align-items:center;gap:4px">${col}<button onclick="removeSessCol(${i})" style="background:none;border:none;cursor:pointer;font-size:15px;line-height:1;padding:0;color:#888">×</button></span>`).join("");
+}
+
+function saveSession(){
+  const date=document.getElementById("sess-date").value;
+  const notes=document.getElementById("sess-notes").value.trim();
+  if(!date||!sessCols.length){alert("Informe a data e ao menos uma cor");return;}
+  clients=clients.map(c=>c.id===selClient.id?{...c,sessions:[...c.sessions,{date,colors:[...sessCols],notes}]}:c);
+  svLS("sp_c",clients);
+  selClient=clients.find(c=>c.id===selClient.id);
+  closeModal("modal-session");
+  openClient(selClient.id);
+  renderAlerts();renderClients();
+}
+
+function saveNewClient(){
+  const nome=document.getElementById("nc-nome").value.trim();
+  const tel=document.getElementById("nc-tel").value.trim();
+  const nasc=document.getElementById("nc-nasc").value;
+  const email=document.getElementById("nc-email").value.trim();
+  const obs=document.getElementById("nc-obs").value.trim();
+  if(!nome||!tel){alert("Nome e telefone são obrigatórios");return;}
+  const newId=Math.max(0,...clients.map(c=>c.id))+1;
+  clients.push({id:newId,nome,tel,nasc,email,obs,sessions:[]});
+  svLS("sp_c",clients);
+  document.getElementById("nc-nome").value="";
+  document.getElementById("nc-tel").value="";
+  document.getElementById("nc-nasc").value="";
+  document.getElementById("nc-email").value="";
+  document.getElementById("nc-obs").value="";
+  const msg=document.getElementById("nc-msg");
+  msg.textContent=`"${nome}" cadastrada com sucesso!`;
+  msg.style.display="block";
+  setTimeout(()=>msg.style.display="none",3000);
+  renderClients();renderAlerts();
+}
+
+init();
+</script>
+</body>
+</html>
