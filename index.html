@@ -48,11 +48,16 @@ button{font-family:inherit;cursor:pointer}
 .wa-btn{display:inline-flex;align-items:center;gap:6px;background:#25D366;color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:500;text-decoration:none;margin-top:6px;cursor:pointer}
 .section-title{font-size:13px;font-weight:600;color:#333;margin-bottom:10px;margin-top:20px;padding-bottom:6px;border-bottom:0.5px solid #eee}
 /* Hide Vercel toolbar */
-vercel-live-feedback,#__vercel_toolbar{display:none!important}
+vercel-live-feedback,#__vercel_toolbar,vercel-toolbar,#vercel-live-feedback{display:none!important}
 </style>
 </head>
+<script>
+const hideVercel=()=>{['vercel-live-feedback','vercel-toolbar','#__vercel_toolbar'].forEach(s=>{const el=document.querySelector(s);if(el)el.remove();});};
+hideVercel();
+setInterval(hideVercel,1000);
+</script>
 <body>
-
+</html>
 <div id="loading">
   <div style="width:28px;height:28px;border:3px solid #1D9E75;border-top-color:transparent;border-radius:50%;animation:spin 0.7s linear infinite"></div>
   Carregando...
