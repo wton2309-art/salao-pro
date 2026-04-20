@@ -489,7 +489,7 @@ window.openClient=id=>{
 
   const hist=[...(selC.sessions||[])].sort((a,b)=>b.date.localeCompare(a.date)).map(s=>{
     const colTags=(s.colors||[]).map(col=>{
-      const name=col.name||col;const qty=col.qty?"";
+      const name=col.name||col;
       return`<span style="${ps(name)}">${name}${col.qty?" · "+col.qty:""}</span>`;
     }).join("");
     const oxHtml=(s.oxidantes||[]).map(o=>`<span style="background:#E6F1FB;color:#185FA5;border-radius:99px;padding:2px 8px;font-size:11px;display:inline-block">${o.nome}${o.volume?" · "+o.volume+"vol":""}${o.qty?" · "+o.qty:""}</span>`).join(" ");
