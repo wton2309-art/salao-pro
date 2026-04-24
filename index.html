@@ -47,17 +47,12 @@ button{font-family:inherit;cursor:pointer}
 .code-box{background:#f0faf5;border:1px dashed #1D9E75;border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
 .wa-btn{display:inline-flex;align-items:center;gap:6px;background:#25D366;color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:500;text-decoration:none;margin-top:6px;cursor:pointer}
 .section-title{font-size:13px;font-weight:600;color:#333;margin-bottom:10px;margin-top:20px;padding-bottom:6px;border-bottom:0.5px solid #eee}
-/* Hide Vercel toolbar */
+.aux-item{display:flex;align-items:center;justify-content:space-between;background:#f5f5f5;border-radius:8px;padding:8px 12px;margin-bottom:6px}
 vercel-live-feedback,#__vercel_toolbar,vercel-toolbar,#vercel-live-feedback{display:none!important}
 </style>
 </head>
-<script>
-const hideVercel=()=>{['vercel-live-feedback','vercel-toolbar','#__vercel_toolbar'].forEach(s=>{const el=document.querySelector(s);if(el)el.remove();});};
-hideVercel();
-setInterval(hideVercel,1000);
-</script>
 <body>
-</html>
+
 <div id="loading">
   <div style="width:28px;height:28px;border:3px solid #1D9E75;border-top-color:transparent;border-radius:50%;animation:spin 0.7s linear infinite"></div>
   Carregando...
@@ -85,8 +80,8 @@ setInterval(hideVercel,1000);
       <div class="field"><label>Senha</label><input id="r-pass" type="password" placeholder="Mínimo 6 caracteres"/></div>
       <div class="field"><label>Perfil</label>
         <select id="r-role" onchange="toggleCodeField()">
-          <option value="aux">Auxiliar — somente visualizar</option>
-          <option value="pro">Profissional — acesso completo</option>
+          <option value="aux">Auxiliar</option>
+          <option value="pro">Profissional</option>
         </select>
       </div>
       <div id="code-field" class="field">
@@ -121,15 +116,15 @@ setInterval(hideVercel,1000);
   <div class="nav">
     <button class="active" onclick="showTab('clientes',this)">Clientes</button>
     <button onclick="showTab('alertas',this)">Alertas <span id="alert-badge" class="hidden" style="background:#D85A30;color:#fff;border-radius:99px;font-size:10px;padding:1px 6px;margin-left:4px"></span></button>
-    <button id="nav-nova" onclick="showTab('nova',this)">Nova cliente</button>
-    <button id="nav-cores" onclick="showTab('cores',this)">Cores</button>
+    <button onclick="showTab('nova',this)">Nova cliente</button>
+    <button onclick="showTab('cores',this)">Cores</button>
+    <button onclick="showTab('servicos',this)">Serviços</button>
     <button onclick="showTab('config',this)">Configurações</button>
   </div>
   <div class="content">
 
     <!-- Clientes -->
     <div id="tab-clientes">
-      <div id="readonly-msg" class="hidden" style="background:#E6F1FB;color:#185FA5;font-size:12px;padding:7px 12px;border-radius:8px;margin-bottom:12px">Modo visualização — edição de sessões disponível para auxiliares</div>
       <input id="search" placeholder="Buscar por nome ou telefone..." oninput="renderClients()" style="margin-bottom:14px"/>
       <div id="client-grid" class="grid"></div>
     </div>
@@ -153,9 +148,10 @@ setInterval(hideVercel,1000);
         </div>
         <div style="flex:1">
           <div class="g2">
-            <div class="field"><label>Nome completo</label><input id="nc-nome"/></div>
+            <div class="field"><label>Nome completo</label><input id="nc-nome" placeholder="Nome da cliente" oninput="suggestContact(this)"/></div>
             <div class="field"><label>Telefone (com DDD)</label><input id="nc-tel" placeholder="11999999999"/></div>
           </div>
+          <div id="contact-suggestions" class="hidden" style="background:#fff;border:0.5px solid #ddd;border-radius:8px;margin-top:-10px;margin-bottom:10px;max-height:150px;overflow-y:auto;z-index:10;position:relative"></div>
           <div class="g2">
             <div class="field"><label>Nascimento</label><input id="nc-nasc" type="date"/></div>
             <div class="field"><label>E-mail</label><input id="nc-email" type="email"/></div>
@@ -177,6 +173,16 @@ setInterval(hideVercel,1000);
       </div>
     </div>
 
+    <!-- Serviços -->
+    <div id="tab-servicos" class="hidden">
+      <p style="font-size:13px;color:#888;margin-bottom:12px">Tipos de serviço do salão</p>
+      <div id="servicos-list"></div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <input id="novo-servico" placeholder="ex: Coloração completa, Mechas, Hidratação..." style="flex:1" onkeydown="if(event.key==='Enter')addServico()"/>
+        <button class="btn-s" onclick="addServico()">Adicionar</button>
+      </div>
+    </div>
+
     <!-- Configurações -->
     <div id="tab-config" class="hidden">
       <p style="font-size:15px;font-weight:500;color:#111;margin-bottom:4px">Configurações</p>
@@ -193,6 +199,9 @@ setInterval(hideVercel,1000);
             <button class="btn-s" onclick="genCode()" style="font-size:12px;padding:6px 12px">Novo</button>
           </div>
         </div>
+
+        <p class="section-title">Auxiliares vinculadas</p>
+        <div id="aux-list"><p style="font-size:13px;color:#aaa">Carregando...</p></div>
       </div>
 
       <p class="section-title">Mensagem de reativação (WhatsApp)</p>
@@ -201,10 +210,9 @@ setInterval(hideVercel,1000);
         <textarea id="wa-msg-input" style="height:100px;resize:vertical" placeholder="Digite a mensagem..."></textarea>
       </div>
       <button class="btn-p" onclick="saveWaMsg()" style="font-size:13px;padding:8px 18px">Salvar mensagem</button>
-      <p id="wa-msg-saved" class="hidden" style="color:#0F6E56;font-size:12px;margin-top:8px">Mensagem salva!</p>
+      <p id="wa-msg-saved" class="hidden" style="color:#0F6E56;font-size:12px;margin-top:8px">✓ Mensagem salva com sucesso!</p>
 
       <p class="section-title">Compartilhar app</p>
-      <p style="font-size:13px;color:#777;margin-bottom:10px">Envie o link do app para sua equipe ou clientes.</p>
       <button class="btn-p" onclick="shareApp()" style="font-size:13px;padding:8px 18px;display:inline-flex;align-items:center;gap:6px">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
         Compartilhar link do app
@@ -219,7 +227,28 @@ setInterval(hideVercel,1000);
     <div id="modal-client-body"></div>
     <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
       <button class="btn-s" onclick="closeModal('modal-client')">Fechar</button>
+      <button class="btn-s" id="btn-edit-client" onclick="openEditClient()">✏️ Editar</button>
       <button class="btn-p" id="btn-add-sess" onclick="openSession()">+ Sessão</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal editar cliente -->
+<div id="modal-edit-client" class="overlay hidden" onclick="if(event.target===this)closeModal('modal-edit-client')">
+  <div class="modal">
+    <h3 style="font-size:16px;font-weight:500;margin-bottom:16px">Editar cadastro</h3>
+    <div class="g2">
+      <div class="field"><label>Nome completo</label><input id="edit-nome"/></div>
+      <div class="field"><label>Telefone</label><input id="edit-tel"/></div>
+    </div>
+    <div class="g2">
+      <div class="field"><label>Nascimento</label><input id="edit-nasc" type="date"/></div>
+      <div class="field"><label>E-mail</label><input id="edit-email" type="email"/></div>
+    </div>
+    <div class="field"><label>Observações</label><textarea id="edit-obs" style="height:70px;resize:vertical"></textarea></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
+      <button class="btn-s" onclick="closeModal('modal-edit-client')">Cancelar</button>
+      <button class="btn-p" onclick="saveEditClient()">Salvar alterações</button>
     </div>
   </div>
 </div>
@@ -228,25 +257,23 @@ setInterval(hideVercel,1000);
 <div id="modal-session" class="overlay hidden" onclick="if(event.target===this)closeModal('modal-session')">
   <div class="modal">
     <h3 style="font-size:16px;font-weight:500;margin-bottom:16px">Registrar sessão de coloração</h3>
-    <div class="field"><label>Data da sessão</label><input id="sess-date" type="date"/></div>
+    <div class="g2">
+      <div class="field"><label>Data da sessão</label><input id="sess-date" type="date"/></div>
+      <div class="field"><label>Tipo de serviço</label>
+        <select id="sess-servico">
+          <option value="">Selecione...</option>
+        </select>
+      </div>
+    </div>
 
     <div class="field">
       <label>Cores / Tintas usadas</label>
       <div style="border:0.5px solid #ddd;border-radius:10px;padding:12px">
         <div id="sess-tags" style="display:flex;flex-wrap:wrap;gap:5px;min-height:28px;margin-bottom:10px"></div>
         <div class="g3" style="align-items:end">
-          <div>
-            <label style="font-size:11px;color:#aaa;margin-bottom:3px;display:block">Cor / Produto</label>
-            <input id="sess-col-inp" list="cat-list" placeholder="Nome da cor..." style="font-size:13px"/>
-            <datalist id="cat-list"></datalist>
-          </div>
-          <div>
-            <label style="font-size:11px;color:#aaa;margin-bottom:3px;display:block">Quantidade</label>
-            <input id="sess-col-qty" placeholder="ex: 60g" style="font-size:13px"/>
-          </div>
-          <div style="display:flex;align-items:flex-end">
-            <button class="btn-s" onclick="addSessColor()" style="width:100%;font-size:12px;padding:8px 0">+ Adicionar</button>
-          </div>
+          <div><label style="font-size:11px;color:#aaa;margin-bottom:3px;display:block">Cor / Produto</label><input id="sess-col-inp" list="cat-list" placeholder="Nome da cor..." style="font-size:13px"/><datalist id="cat-list"></datalist></div>
+          <div><label style="font-size:11px;color:#aaa;margin-bottom:3px;display:block">Quantidade</label><input id="sess-col-qty" placeholder="ex: 60g" style="font-size:13px"/></div>
+          <div style="display:flex;align-items:flex-end"><button class="btn-s" onclick="addSessColor()" style="width:100%;font-size:12px;padding:8px 0">+ Cor</button></div>
         </div>
       </div>
     </div>
@@ -256,26 +283,19 @@ setInterval(hideVercel,1000);
       <div style="border:0.5px solid #ddd;border-radius:10px;padding:12px">
         <div id="ox-tags" style="display:flex;flex-wrap:wrap;gap:5px;min-height:28px;margin-bottom:10px"></div>
         <div class="g4" style="align-items:end">
-          <div>
-            <label style="font-size:11px;color:#aaa;margin-bottom:3px;display:block">Oxidante</label>
-            <select id="ox-name" style="font-size:13px">
-              <option value="">Selecione...</option>
-              <option>Ox 10vol</option><option>Ox 20vol</option><option>Ox 30vol</option><option>Ox 40vol</option><option>Outro</option>
-            </select>
+          <div><label style="font-size:11px;color:#aaa;margin-bottom:3px;display:block">Oxidante</label>
+            <select id="ox-name" style="font-size:13px"><option value="">Selecione...</option><option>Ox 10vol</option><option>Ox 20vol</option><option>Ox 30vol</option><option>Ox 40vol</option><option>Outro</option></select>
           </div>
-          <div>
-            <label style="font-size:11px;color:#aaa;margin-bottom:3px;display:block">Volumagem</label>
-            <input id="ox-vol" placeholder="ex: 30" style="font-size:13px"/>
-          </div>
-          <div>
-            <label style="font-size:11px;color:#aaa;margin-bottom:3px;display:block">Quantidade</label>
-            <input id="ox-qty" placeholder="ex: 60ml" style="font-size:13px"/>
-          </div>
-          <div style="display:flex;align-items:flex-end">
-            <button class="btn-s" onclick="addOx()" style="width:100%;font-size:12px;padding:8px 0">+ Add</button>
-          </div>
+          <div><label style="font-size:11px;color:#aaa;margin-bottom:3px;display:block">Volumagem</label><input id="ox-vol" placeholder="ex: 30" style="font-size:13px"/></div>
+          <div><label style="font-size:11px;color:#aaa;margin-bottom:3px;display:block">Quantidade</label><input id="ox-qty" placeholder="ex: 60ml" style="font-size:13px"/></div>
+          <div style="display:flex;align-items:flex-end"><button class="btn-s" onclick="addOx()" style="width:100%;font-size:12px;padding:8px 0">+ Ox</button></div>
         </div>
       </div>
+    </div>
+
+    <div class="field">
+      <label>Tempo de pausa da cor (minutos)</label>
+      <input id="sess-pausa" type="number" min="0" max="120" placeholder="ex: 35" style="width:100%"/>
     </div>
 
     <div class="field"><label>Observações</label><textarea id="sess-notes" style="height:70px;resize:vertical" placeholder="Técnica, resultado, próxima visita..."></textarea></div>
@@ -286,7 +306,7 @@ setInterval(hideVercel,1000);
   </div>
 </div>
 
-<!-- Modal alterar data última visita (auxiliar) -->
+<!-- Modal alterar data -->
 <div id="modal-date" class="overlay hidden" onclick="if(event.target===this)closeModal('modal-date')">
   <div class="modal" style="max-width:360px">
     <h3 style="font-size:16px;font-weight:500;margin-bottom:16px">Alterar data da última visita</h3>
@@ -301,7 +321,7 @@ setInterval(hideVercel,1000);
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import{getFirestore,collection,doc,addDoc,updateDoc,onSnapshot,setDoc,getDoc}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import{getFirestore,collection,doc,addDoc,updateDoc,deleteDoc,onSnapshot,setDoc,getDoc,getDocs,query,where}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const cfg={apiKey:"AIzaSyD7iOpPes0e60ColfnhulRkg-QKHlDg-iY",authDomain:"salao-pro-17519.firebaseapp.com",projectId:"salao-pro-17519",storageBucket:"salao-pro-17519.firebasestorage.app",messagingSenderId:"771780855688",appId:"1:771780855688:web:5cc873be37269a7d379c3d"};
 const PRO_CODE="SALAOPRO2025";
@@ -310,9 +330,9 @@ const auth=getAuth(fb);
 const db=getFirestore(fb);
 
 const PL=["#9FE1CB","#B5D4F4","#F5C4B3","#FAC775","#C0DD97","#F4C0D1","#CECBF6","#D3D1C7"];
-const ps=n=>{const bg=PL[n.length%PL.length];return`background:${bg}33;color:#2C2C2A;border:1px solid ${bg};border-radius:99px;padding:2px 10px;font-size:12px;display:inline-block`;};
-const avBg=n=>PL[n.charCodeAt(0)%PL.length];
-const ini=n=>{const p=n.trim().split(" ");return p.length>=2?p[0][0]+p[1][0]:p[0].slice(0,2);};
+const ps=n=>{const bg=PL[(n||"").length%PL.length];return`background:${bg}33;color:#2C2C2A;border:1px solid ${bg};border-radius:99px;padding:2px 10px;font-size:12px;display:inline-block`;};
+const avBg=n=>PL[(n||"A").charCodeAt(0)%PL.length];
+const ini=n=>{const p=(n||"?").trim().split(" ");return p.length>=2?p[0][0]+p[1][0]:p[0].slice(0,2);};
 const tStr=()=>new Date().toISOString().split("T")[0];
 const dBet=(d1,d2)=>Math.floor((new Date(d2)-new Date(d1))/86400000);
 const fmt=d=>{if(!d)return"—";const[y,m,dd]=d.split("-");return`${dd}/${m}/${y}`;};
@@ -320,9 +340,9 @@ const isBd=nasc=>{if(!nasc)return false;const d=new Date(nasc+"T00:00:00"),t=new
 const lS=c=>c.sessions&&c.sessions.length?[...c.sessions].sort((a,b)=>b.date.localeCompare(a.date))[0]:null;
 const $=id=>document.getElementById(id);
 const cleanTel=t=>(t||"").replace(/\D/g,"");
+const DEFAULT_WA="Olá {nome}! 😊 Sentimos sua falta no salão. Que tal agendar um horário? Temos novidades te esperando! 💇‍♀️";
 
-const DEFAULT_WA_MSG="Olá {nome}! 😊 Sentimos sua falta no salão. Que tal agendar um horário? Temos novidades te esperando! 💇‍♀️";
-let cUser=null,cRole=null,clients=[],catalog=[],selC=null,sCols=[],sOxs=[],auxCode="",photoB64=null,waMsgTemplate=DEFAULT_WA_MSG,unsubC=null,unsubK=null;
+let cUser=null,cRole=null,clients=[],catalog=[],servicos=[],selC=null,sCols=[],sOxs=[],auxCode="",photoB64=null,waMsg=DEFAULT_WA,unsubC=null,unsubK=null,unsubS=null;
 
 // ── Auth ─────────────────────────────────────────────────────────────
 onAuthStateChanged(auth,async fu=>{
@@ -336,16 +356,18 @@ function showApp(){
   $("loading").classList.add("hidden");$("login-screen").classList.add("hidden");$("main-screen").classList.remove("hidden");
   const ip=cRole==="pro";
   const b=$("role-badge");b.textContent=ip?"Profissional":"Auxiliar";b.style.background=ip?"#E1F5EE":"#E6F1FB";b.style.color=ip?"#0F6E56":"#185FA5";
-  $("nav-nova").style.display=ip?"":"none";
-  $("nav-cores").style.display=ip?"":"none";
-  if(!ip)$("readonly-msg").classList.remove("hidden");
-  if(ip){$("pro-only-cfg").classList.remove("hidden");loadCode();}
+  if(ip){$("pro-only-cfg").classList.remove("hidden");loadCode();loadAuxList();}
   loadWaMsg();
   subData();
+  requestContacts();
 }
 
 window.toggleForm=reg=>{$("form-login").classList.toggle("hidden",reg);$("form-reg").classList.toggle("hidden",!reg);};
-window.toggleCodeField=()=>{$("code-field").classList.toggle("hidden",$("r-role").value==="aux"?false:true);$("r-code").placeholder=$("r-role").value==="aux"?"Cole o código recebido da profissional":"SALAOPRO2025";};
+window.toggleCodeField=()=>{
+  const isAux=$("r-role").value==="aux";
+  $("code-field").classList.toggle("hidden",false);
+  $("r-code").placeholder=isAux?"Cole o código recebido da profissional":"SALAOPRO2025";
+};
 
 window.doLogin=async()=>{
   const email=$("l-email").value.trim(),pass=$("l-pass").value,err=$("l-err"),btn=$("btn-login");
@@ -366,12 +388,41 @@ window.doRegister=async()=>{
   }
   if(role==="pro"&&code!==PRO_CODE){err.textContent="Código de profissional inválido.";err.classList.remove("hidden");return;}
   btn.innerHTML='<span class="spin"></span>Criando conta...';btn.disabled=true;
-  try{const cr=await createUserWithEmailAndPassword(auth,email,pass);await setDoc(doc(db,"users",cr.user.uid),{nome,email,role});err.classList.add("hidden");}
+  try{const cr=await createUserWithEmailAndPassword(auth,email,pass);await setDoc(doc(db,"users",cr.user.uid),{nome,email,role,active:true});err.classList.add("hidden");}
   catch(e){err.textContent=e.code==="auth/email-already-in-use"?"E-mail já cadastrado":"Erro ao criar conta.";err.classList.remove("hidden");}
   btn.innerHTML="Criar conta";btn.disabled=false;
 };
 
-window.doLogout=async()=>{if(unsubC)unsubC();if(unsubK)unsubK();await signOut(auth);};
+window.doLogout=async()=>{if(unsubC)unsubC();if(unsubK)unsubK();if(unsubS)unsubS();await signOut(auth);};
+
+// ── Contacts (agenda) ─────────────────────────────────────────────────
+let contacts=[];
+async function requestContacts(){
+  if("contacts" in navigator&&"ContactsManager" in window){
+    try{
+      const props=["name","tel"];
+      const opts={multiple:true};
+      contacts=await navigator.contacts.select(props,opts)||[];
+    }catch{}
+  }
+}
+window.suggestContact=inp=>{
+  const q=inp.value.trim().toLowerCase();
+  const box=$("contact-suggestions");
+  if(!q||contacts.length===0){box.classList.add("hidden");return;}
+  const matches=contacts.filter(c=>(c.name||[]).join("").toLowerCase().includes(q)).slice(0,5);
+  if(!matches.length){box.classList.add("hidden");return;}
+  box.classList.remove("hidden");
+  box.innerHTML=matches.map(c=>{
+    const name=(c.name||[""])[0];
+    const tel=(c.tel||[""])[0];
+    return`<div onclick="fillContact('${name.replace(/'/g,"\\'")}','${tel.replace(/'/g,"\\'")}'')" style="padding:8px 12px;font-size:13px;cursor:pointer;border-bottom:0.5px solid #f0f0f0">${name}<span style="color:#aaa;font-size:12px;margin-left:8px">${tel}</span></div>`;
+  }).join("");
+};
+window.fillContact=(name,tel)=>{
+  $("nc-nome").value=name;$("nc-tel").value=tel;
+  $("contact-suggestions").classList.add("hidden");
+};
 
 // ── Code ──────────────────────────────────────────────────────────────
 async function loadCode(){
@@ -387,39 +438,58 @@ window.genCode=async()=>{
 };
 window.copyCode=()=>navigator.clipboard.writeText(auxCode).then(()=>alert("Código copiado!"));
 
+// ── Aux list ──────────────────────────────────────────────────────────
+async function loadAuxList(){
+  const snap=await getDocs(collection(db,"users"));
+  const auxUsers=snap.docs.filter(d=>d.data().role==="aux"&&d.data().active!==false);
+  const box=$("aux-list");
+  if(!auxUsers.length){box.innerHTML='<p style="font-size:13px;color:#aaa">Nenhuma auxiliar vinculada.</p>';return;}
+  box.innerHTML=auxUsers.map(d=>`
+    <div class="aux-item">
+      <div><p style="font-size:13px;font-weight:500">${d.data().nome}</p><p style="font-size:12px;color:#888">${d.data().email}</p></div>
+      <button class="btn-d" onclick="desvincularAux('${d.id}','${d.data().nome}')">Desvincular</button>
+    </div>`).join("");
+}
+window.desvincularAux=async(uid,nome)=>{
+  if(!confirm(`Desvincular ${nome}? Ela perderá o acesso ao app.`))return;
+  await updateDoc(doc(db,"users",uid),{active:false,role:"revoked"});
+  alert(`${nome} foi desvinculada.`);
+  loadAuxList();
+};
+
 // ── WA Message ────────────────────────────────────────────────────────
 async function loadWaMsg(){
   const sn=await getDoc(doc(db,"settings","waMsg"));
-  waMsgTemplate=sn.exists()?sn.data().msg:DEFAULT_WA_MSG;
-  $("wa-msg-input").value=waMsgTemplate;
+  waMsg=sn.exists()?sn.data().msg:DEFAULT_WA;
+  $("wa-msg-input").value=waMsg;
 }
 window.saveWaMsg=async()=>{
   const msg=$("wa-msg-input").value.trim();
   if(!msg)return;
   await setDoc(doc(db,"settings","waMsg"),{msg});
-  waMsgTemplate=msg;
+  waMsg=msg;
   const saved=$("wa-msg-saved");saved.classList.remove("hidden");setTimeout(()=>saved.classList.add("hidden"),2500);
+  renderAlerts();
 };
 
 // ── Share ─────────────────────────────────────────────────────────────
 window.shareApp=async()=>{
-  const url=window.location.href;
-  if(navigator.share){
-    try{await navigator.share({title:"Salão Pro",text:"Acesse o app do salão:",url});}
-    catch{}
-  } else {
-    await navigator.clipboard.writeText(url);
-    alert("Link copiado! Cole e compartilhe com sua equipe.");
-  }
+  const url=window.location.origin+window.location.pathname;
+  if(navigator.share){try{await navigator.share({title:"Salão Pro",text:"Acesse o app do salão:",url});}catch{}}
+  else{await navigator.clipboard.writeText(url);alert("Link copiado! Cole e compartilhe com sua equipe.");}
 };
 
 // ── Data ──────────────────────────────────────────────────────────────
 function subData(){
-  unsubC=onSnapshot(collection(db,"clients"),sn=>{clients=sn.docs.map(d=>({id:d.id,...d.data()}));renderClients();renderAlerts();});
+  unsubC=onSnapshot(collection(db,"clients"),sn=>{
+    clients=sn.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>a.nome.localeCompare(b.nome,"pt-BR"));
+    renderClients();renderAlerts();
+  });
   unsubK=onSnapshot(doc(db,"catalog","items"),sn=>{catalog=sn.exists()?(sn.data().list||[]):[];renderCores();updCat();});
+  unsubS=onSnapshot(doc(db,"catalog","servicos"),sn=>{servicos=sn.exists()?(sn.data().list||[]):[];renderServicos();updServicos();});
 }
 
-window.showTab=(id,btn)=>{["clientes","alertas","nova","cores","config"].forEach(t=>$("tab-"+t).classList.add("hidden"));document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));$("tab-"+id).classList.remove("hidden");btn.classList.add("active");};
+window.showTab=(id,btn)=>{["clientes","alertas","nova","cores","servicos","config"].forEach(t=>$("tab-"+t).classList.add("hidden"));document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));$("tab-"+id).classList.remove("hidden");btn.classList.add("active");};
 
 // ── Photo ─────────────────────────────────────────────────────────────
 window.previewPhoto=inp=>{
@@ -436,7 +506,7 @@ window.renderClients=()=>{
     const l=lS(c),days=l?dBet(l.date,tStr()):999,inactive=days>=30,bday=isBd(c.nasc);
     const bl=inactive?"3px solid #D85A30":bday?"3px solid #BA7517":"0.5px solid #e5e5e5";
     const bc=inactive?"#F09595":bday?"#FAC775":"#e5e5e5";
-    const pills=(l?l.colors.slice(0,3):[]).map(col=>`<span style="${ps(col.name||col)}">${col.name||col}</span>`).join("");
+    const pills=(l?(l.colors||[]).slice(0,3):[]).map(col=>`<span style="${ps(col.name||col)}">${col.name||col}</span>`).join("");
     const av=c.photo?`<img src="${c.photo}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0"/>`:`<div style="width:40px;height:40px;border-radius:50%;background:${avBg(c.nome)}33;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;color:#333;flex-shrink:0">${ini(c.nome)}</div>`;
     return`<div class="card" style="border:0.5px solid ${bc};border-left:${bl}" onclick="openClient('${c.id}')">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">${av}<div><div style="font-size:14px;font-weight:500;color:#111">${c.nome}</div><div style="font-size:12px;color:#888">${c.tel||""}</div></div></div>
@@ -462,10 +532,9 @@ window.renderAlerts=()=>{
     h+=ia.map(c=>{
       const l=lS(c),days=l?dBet(l.date,today):null,tel=cleanTel(c.tel);
       const firstName=c.nome.split(" ")[0];
-      const msgText=(waMsgTemplate||DEFAULT_WA_MSG).replace("{nome}",firstName);
-      const msg=encodeURIComponent(msgText);
-      const wa=tel?`<a href="https://wa.me/55${tel}?text=${msg}" target="_blank" class="wa-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.109.549 4.09 1.504 5.813L.057 23.057l5.408-1.418A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.809 9.809 0 0 1-5.002-1.368l-.359-.214-3.21.842.857-3.131-.234-.372A9.818 9.818 0 0 1 2.182 12c0-5.42 4.398-9.818 9.818-9.818 5.42 0 9.818 4.398 9.818 9.818 0 5.42-4.398 9.818-9.818 9.818z"/></svg> Enviar WhatsApp</a>`:
-      `<span style="font-size:11px;color:#aaa">Sem telefone cadastrado</span>`;
+      const msgText=(waMsg||DEFAULT_WA).replace(/\{nome\}/g,firstName);
+      const wa=tel?`<a href="https://wa.me/55${tel}?text=${encodeURIComponent(msgText)}" target="_blank" class="wa-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.109.549 4.09 1.504 5.813L.057 23.057l5.408-1.418A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.809 9.809 0 0 1-5.002-1.368l-.359-.214-3.21.842.857-3.131-.234-.372A9.818 9.818 0 0 1 2.182 12c0-5.42 4.398-9.818 9.818-9.818 5.42 0 9.818 4.398 9.818 9.818 0 5.42-4.398 9.818-9.818 9.818z"/></svg> Enviar WhatsApp</a>`:
+      `<span style="font-size:11px;color:#aaa">Sem telefone</span>`;
       return`<div class="alert-inactive"><div class="dot" style="background:#993C1D"></div><div style="flex:1"><b style="color:#4A1B0C;font-size:13px">${c.nome}</b><br><span style="font-size:12px;color:#712B13">Última visita: ${l?fmt(l.date):"nunca"}${days!==null?` (${days} dias)`:""}</span><div style="margin-top:6px">${wa}</div></div></div>`;
     }).join("");
   }
@@ -474,12 +543,24 @@ window.renderAlerts=()=>{
 
 // ── Cores ──────────────────────────────────────────────────────────────
 window.renderCores=()=>{
-  const ip=cRole==="pro";
-  $("cores-list").innerHTML=catalog.map((cor,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;background:#f5f5f5;border-radius:8px;padding:7px 12px;margin-bottom:5px"><span style="${ps(cor)}">${cor}</span>${ip?`<button class="btn-d" onclick="removeCor(${i})">Remover</button>`:""}</div>`).join("");
+  $("cores-list").innerHTML=catalog.map((cor,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;background:#f5f5f5;border-radius:8px;padding:7px 12px;margin-bottom:5px"><span style="${ps(cor)}">${cor}</span><button class="btn-d" onclick="removeCor(${i})">Remover</button></div>`).join("");
 };
 window.addCor=async()=>{const inp=$("nova-cor"),v=inp.value.trim();if(!v||catalog.includes(v))return;await setDoc(doc(db,"catalog","items"),{list:[...catalog,v]});inp.value="";};
 window.removeCor=async i=>{await setDoc(doc(db,"catalog","items"),{list:catalog.filter((_,idx)=>idx!==i)});};
 window.updCat=()=>{$("cat-list").innerHTML=catalog.map(c=>`<option value="${c}">`).join("");};
+
+// ── Serviços ───────────────────────────────────────────────────────────
+window.renderServicos=()=>{
+  $("servicos-list").innerHTML=servicos.map((s,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;background:#f5f5f5;border-radius:8px;padding:7px 12px;margin-bottom:5px"><span style="font-size:13px">${s}</span><button class="btn-d" onclick="removeServico(${i})">Remover</button></div>`).join("");
+};
+window.addServico=async()=>{const inp=$("novo-servico"),v=inp.value.trim();if(!v||servicos.includes(v))return;await setDoc(doc(db,"catalog","servicos"),{list:[...servicos,v]});inp.value="";};
+window.removeServico=async i=>{await setDoc(doc(db,"catalog","servicos"),{list:servicos.filter((_,idx)=>idx!==i)});};
+window.updServicos=()=>{
+  const sel=$("sess-servico");
+  const cur=sel.value;
+  sel.innerHTML='<option value="">Selecione...</option>'+servicos.map(s=>`<option value="${s}">${s}</option>`).join("");
+  if(cur)sel.value=cur;
+};
 
 // ── Client modal ───────────────────────────────────────────────────────
 window.openClient=id=>{
@@ -488,17 +569,18 @@ window.openClient=id=>{
   const ac=[...new Set((selC.sessions||[]).flatMap(s=>(s.colors||[]).map(col=>col.name||col)))];
   const bb=isBd(selC.nasc)?`<span style="font-size:11px;padding:2px 10px;border-radius:99px;background:#FAEEDA;color:#633806;margin-left:8px">Aniversário hoje!</span>`:"";
   const av=selC.photo?`<img src="${selC.photo}" style="width:56px;height:56px;border-radius:50%;object-fit:cover;flex-shrink:0"/>`:`<div style="width:56px;height:56px;border-radius:50%;background:${avBg(selC.nome)}33;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:20px;color:#333;flex-shrink:0">${ini(selC.nome)}</div>`;
-
-  // Auxiliar pode alterar data da última visita
-  const auxDateBtn=`<button onclick="openDateModal()" style="font-size:12px;color:#1D9E75;background:none;border:none;padding:0;margin-top:4px;cursor:pointer;text-decoration:underline">Alterar data da última visita</button>`;
-
   const hist=[...(selC.sessions||[])].sort((a,b)=>b.date.localeCompare(a.date)).map(s=>{
-    const colTags=(s.colors||[]).map(col=>{
-      const name=col.name||col;
-      return`<span style="${ps(name)}">${name}${col.qty?" · "+col.qty:""}</span>`;
-    }).join("");
+    const colTags=(s.colors||[]).map(col=>`<span style="${ps(col.name||col)}">${col.name||col}${col.qty?" · "+col.qty:""}</span>`).join("");
     const oxHtml=(s.oxidantes||[]).map(o=>`<span style="background:#E6F1FB;color:#185FA5;border-radius:99px;padding:2px 8px;font-size:11px;display:inline-block">${o.nome}${o.volume?" · "+o.volume+"vol":""}${o.qty?" · "+o.qty:""}</span>`).join(" ");
-    return`<div class="sess-item"><span style="font-size:13px;font-weight:500">${fmt(s.date)}</span><div style="display:flex;flex-wrap:wrap;gap:4px;margin:6px 0 4px">${colTags}</div>${oxHtml?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px">${oxHtml}</div>`:""} ${s.notes?`<p style="font-size:12px;color:#888;margin:0">${s.notes}</p>`:""}</div>`;
+    const pausaHtml=s.pausa?`<span style="background:#FFF3CD;color:#856404;border-radius:99px;padding:2px 8px;font-size:11px;display:inline-block">⏱ ${s.pausa} min</span>`:"";
+    const servHtml=s.servico?`<span style="background:#E8F4FD;color:#0C6291;border-radius:99px;padding:2px 8px;font-size:11px;display:inline-block">🔧 ${s.servico}</span>`:"";
+    return`<div class="sess-item">
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">${servHtml}${pausaHtml}</div>
+      <span style="font-size:13px;font-weight:500">${fmt(s.date)}</span>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin:6px 0 4px">${colTags}</div>
+      ${oxHtml?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px">${oxHtml}</div>`:""}
+      ${s.notes?`<p style="font-size:12px;color:#888;margin:0">${s.notes}</p>`:""}
+    </div>`;
   }).join("");
 
   $("modal-client-body").innerHTML=`
@@ -508,79 +590,72 @@ window.openClient=id=>{
     </div>
     <div class="g2" style="margin-bottom:8px">
       <div class="meta-box"><div class="meta-lbl">Nascimento</div><div class="meta-val">${selC.nasc?fmt(selC.nasc):"—"}</div></div>
-      <div class="meta-box"><div class="meta-lbl">Última sessão</div><div class="meta-val">${l?`${fmt(l.date)} (${days}d)`:"Sem sessões"}</div>${auxDateBtn}</div>
+      <div class="meta-box"><div class="meta-lbl">Última sessão</div><div class="meta-val">${l?`${fmt(l.date)} (${days}d)`:"Sem sessões"}</div>
+      <button onclick="openDateModal()" style="font-size:12px;color:#1D9E75;background:none;border:none;padding:0;margin-top:4px;cursor:pointer;text-decoration:underline">Alterar data</button></div>
     </div>
     ${selC.obs?`<div style="background:#f5f5f5;border-radius:8px;padding:8px 12px;margin-bottom:14px;font-size:12px;color:#777">Obs: ${selC.obs}</div>`:""}
     ${ac.length?`<p style="font-size:11px;font-weight:500;color:#aaa;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">Cores já utilizadas</p><div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:16px">${ac.map(col=>`<span style="${ps(col)}">${col}</span>`).join("")}</div>`:""}
     <p style="font-size:11px;font-weight:500;color:#aaa;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">Histórico de sessões</p>
     ${hist||'<p style="font-size:13px;color:#bbb">Sem sessões registradas</p>'}`;
 
-  $("btn-add-sess").style.display="";
   $("modal-client").classList.remove("hidden");
 };
 
 window.closeModal=id=>$(id).classList.add("hidden");
 
-// ── Alterar data última visita ─────────────────────────────────────────
-window.openDateModal=()=>{
-  const l=lS(selC);
-  $("new-visit-date").value=l?l.date:tStr();
-  $("modal-date").classList.remove("hidden");
+// ── Edit client ────────────────────────────────────────────────────────
+window.openEditClient=()=>{
+  if(!selC)return;
+  $("edit-nome").value=selC.nome||"";
+  $("edit-tel").value=selC.tel||"";
+  $("edit-nasc").value=selC.nasc||"";
+  $("edit-email").value=selC.email||"";
+  $("edit-obs").value=selC.obs||"";
+  $("modal-edit-client").classList.remove("hidden");
+};
+window.saveEditClient=async()=>{
+  const nome=$("edit-nome").value.trim(),tel=$("edit-tel").value.trim();
+  if(!nome||!tel){alert("Nome e telefone são obrigatórios");return;}
+  await updateDoc(doc(db,"clients",selC.id),{nome,tel,nasc:$("edit-nasc").value,email:$("edit-email").value.trim(),obs:$("edit-obs").value.trim()});
+  closeModal("modal-edit-client");
+  closeModal("modal-client");
 };
 
+// ── Date modal ─────────────────────────────────────────────────────────
+window.openDateModal=()=>{const l=lS(selC);$("new-visit-date").value=l?l.date:tStr();$("modal-date").classList.remove("hidden");};
 window.saveVisitDate=async()=>{
-  const newDate=$("new-visit-date").value;
-  if(!newDate)return;
+  const newDate=$("new-visit-date").value;if(!newDate)return;
   const sessions=[...(selC.sessions||[])];
-  if(sessions.length>0){
-    // Update the most recent session date
-    const sorted=[...sessions].sort((a,b)=>b.date.localeCompare(a.date));
-    sorted[0].date=newDate;
-    await updateDoc(doc(db,"clients",selC.id),{sessions:sorted});
-  } else {
-    // Add a new empty session with the given date
-    await updateDoc(doc(db,"clients",selC.id),{sessions:[{date:newDate,colors:[],oxidantes:[],notes:"Visita registrada"}]});
-  }
-  closeModal("modal-date");
-  closeModal("modal-client");
+  if(sessions.length>0){const sorted=[...sessions].sort((a,b)=>b.date.localeCompare(a.date));sorted[0].date=newDate;await updateDoc(doc(db,"clients",selC.id),{sessions:sorted});}
+  else{await updateDoc(doc(db,"clients",selC.id),{sessions:[{date:newDate,colors:[],oxidantes:[],notes:"Visita registrada",pausa:"",servico:""}]});}
+  closeModal("modal-date");closeModal("modal-client");
 };
 
 // ── Session ────────────────────────────────────────────────────────────
 window.openSession=()=>{
   $("sess-date").value=tStr();$("sess-notes").value="";$("sess-col-inp").value="";$("sess-col-qty").value="";
-  $("ox-name").value="";$("ox-vol").value="";$("ox-qty").value="";
+  $("ox-name").value="";$("ox-vol").value="";$("ox-qty").value="";$("sess-pausa").value="";$("sess-servico").value="";
   sCols=[];sOxs=[];renderST();renderOxT();
   $("modal-session").classList.remove("hidden");
 };
-
 window.addSessColor=()=>{
   const name=$("sess-col-inp").value.trim(),qty=$("sess-col-qty").value.trim();
-  if(!name)return;
-  sCols.push({name,qty});
-  $("sess-col-inp").value="";$("sess-col-qty").value="";
-  renderST();
+  if(!name)return;sCols.push({name,qty});$("sess-col-inp").value="";$("sess-col-qty").value="";renderST();
 };
 window.removeSC=i=>{sCols.splice(i,1);renderST();};
-window.renderST=()=>{
-  $("sess-tags").innerHTML=sCols.map((col,i)=>`<span style="${ps(col.name)};display:inline-flex;align-items:center;gap:4px">${col.name}${col.qty?" · "+col.qty:""}<button onclick="removeSC(${i})" style="background:none;border:none;cursor:pointer;font-size:15px;padding:0;color:#888">×</button></span>`).join("");
-};
-
+window.renderST=()=>{$("sess-tags").innerHTML=sCols.map((col,i)=>`<span style="${ps(col.name)};display:inline-flex;align-items:center;gap:4px">${col.name}${col.qty?" · "+col.qty:""}<button onclick="removeSC(${i})" style="background:none;border:none;cursor:pointer;font-size:15px;padding:0;color:#888">×</button></span>`).join("");};
 window.addOx=()=>{
   const nome=$("ox-name").value,vol=$("ox-vol").value.trim(),qty=$("ox-qty").value.trim();
-  if(!nome){alert("Selecione o oxidante");return;}
-  sOxs.push({nome,volume:vol,qty});
-  $("ox-name").value="";$("ox-vol").value="";$("ox-qty").value="";
-  renderOxT();
+  if(!nome){alert("Selecione o oxidante");return;}sOxs.push({nome,volume:vol,qty});
+  $("ox-name").value="";$("ox-vol").value="";$("ox-qty").value="";renderOxT();
 };
 window.removeOx=i=>{sOxs.splice(i,1);renderOxT();};
-window.renderOxT=()=>{
-  $("ox-tags").innerHTML=sOxs.map((o,i)=>`<span style="background:#E6F1FB;color:#185FA5;border-radius:99px;padding:2px 10px;font-size:12px;display:inline-flex;align-items:center;gap:4px">${o.nome}${o.volume?" · "+o.volume+"vol":""}${o.qty?" · "+o.qty:""}<button onclick="removeOx(${i})" style="background:none;border:none;cursor:pointer;font-size:14px;padding:0;color:#888">×</button></span>`).join("");
-};
+window.renderOxT=()=>{$("ox-tags").innerHTML=sOxs.map((o,i)=>`<span style="background:#E6F1FB;color:#185FA5;border-radius:99px;padding:2px 10px;font-size:12px;display:inline-flex;align-items:center;gap:4px">${o.nome}${o.volume?" · "+o.volume+"vol":""}${o.qty?" · "+o.qty:""}<button onclick="removeOx(${i})" style="background:none;border:none;cursor:pointer;font-size:14px;padding:0;color:#888">×</button></span>`).join("");};
 
 window.saveSession=async()=>{
-  const date=$("sess-date").value,notes=$("sess-notes").value.trim();
+  const date=$("sess-date").value,notes=$("sess-notes").value.trim(),pausa=$("sess-pausa").value.trim(),servico=$("sess-servico").value;
   if(!date||!sCols.length){alert("Informe a data e ao menos uma cor");return;}
-  await updateDoc(doc(db,"clients",selC.id),{sessions:[...(selC.sessions||[]),{date,colors:[...sCols],oxidantes:[...sOxs],notes}]});
+  await updateDoc(doc(db,"clients",selC.id),{sessions:[...(selC.sessions||[]),{date,colors:[...sCols],oxidantes:[...sOxs],notes,pausa,servico}]});
   closeModal("modal-session");closeModal("modal-client");
 };
 
@@ -595,6 +670,11 @@ window.saveNewClient=async()=>{
   photoB64=null;$("photo-prev").classList.add("hidden");$("photo-ph").classList.remove("hidden");
   const msg=$("nc-msg");msg.textContent=`"${nome}" cadastrada com sucesso!`;msg.classList.remove("hidden");setTimeout(()=>msg.classList.add("hidden"),3000);
 };
+</script>
+
+<script>
+const hv=()=>{['vercel-live-feedback','vercel-toolbar','#__vercel_toolbar'].forEach(s=>{const el=document.querySelector(s);if(el)el.remove();});};
+hv();setInterval(hv,1000);
 </script>
 </body>
 </html>
