@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Salão Pro</title>
+<style>
+:root{
+  --g:#138a5f;--gh:#0f6d4a;--gb:#e8f7f1;--gt:#0d6647;
+  --bg:#eef0ee;--s:#fff;--s2:#f4f5f4;--b:#cdd1cd;--bs:#a8b0a8;
+  --t:#181f18;--t2:#445044;--t3:#6e7a6e;
+  --r:#b83025;--rb:#fdecea;--yb:#fffbeb;--bb:#e8f1fb;
+  --rr:10px;--rl:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);min-height:100vh;color:var(--t)}
+input,textarea{font-family:inherit;font-size:14px;border:1.5px solid var(--b);border-radius:var(--rr);padding:9px 13px;outline:none;background:var(--s);width:100%;color:var(--t);transition:border-color .15s,box-shadow .15s}
+input:focus,textarea:focus{border-color:var(--g);box-shadow:0 0 0 3px rgba(19,138,95,.12)}
+select{font-family:inherit;font-size:14px;border:1.5px solid var(--b);border-radius:var(--rr);padding:9px 13px;outline:none;background:var(--s);width:100%;color:var(--t)}
+select:focus{border-color:var(--g)}
+button{font-family:inherit;cursor:pointer;transition:opacity .15s,transform .1s}
+button:active{transform:scale(.97)}
+.bp{padding:10px 22px;background:var(--g);border:none;color:#fff;border-radius:var(--rr);font-size:13px;font-weight:600;box-shadow:0 2px 6px rgba(19,138,95,.25)}
+.bp:hover{background:var(--gh)}
+.bs{padding:9px 16px;background:var(--s);border:1.5px solid var(--b);border-radius:var(--rr);font-size:13px;color:var(--t2)}
+.bs:hover{border-color:var(--bs);background:var(--s2)}
+.bd{padding:5px 11px;background:transparent;border:1.5px solid #f1a9a0;border-radius:7px;font-size:12px;color:var(--r);font-weight:500}
+.bd:hover{background:var(--rb)}
+.topbar{background:var(--s);border-bottom:1.5px solid var(--b);padding:.75rem 1.2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.nav{background:var(--s);border-bottom:1.5px solid var(--b);display:flex;overflow-x:auto}
+.nav button{padding:12px 16px;font-size:13px;background:none;border:none;border-bottom:2.5px solid transparent;color:var(--t3);cursor:pointer;white-space:nowrap;font-family:inherit;font-weight:500}
+.nav button.active{color:var(--g);border-bottom-color:var(--g);font-weight:700}
+.nav button:hover:not(.active){color:var(--t2);background:var(--s2)}
+.content{padding:1.2rem;max-width:900px;margin:0 auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.card{background:var(--s);border:1.5px solid var(--b);border-radius:var(--rl);padding:1rem;cursor:pointer;transition:box-shadow .15s,border-color .15s;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.card:hover{box-shadow:0 2px 8px rgba(0,0,0,.10);border-color:var(--bs)}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem;overflow-y:auto}
+.modal{background:var(--s);border-radius:var(--rl);border:1.5px solid var(--b);width:100%;max-width:520px;max-height:90vh;overflow-y:auto;padding:1.6rem;margin:auto;box-shadow:0 4px 20px rgba(0,0,0,.14)}
+.fi{margin-bottom:15px}
+.fi label{font-size:13px;color:var(--t2);display:block;margin-bottom:5px;font-weight:500}
+.mb{background:var(--s2);border:1.5px solid var(--b);border-radius:var(--rr);padding:9px 13px}
+.ml{font-size:11px;color:var(--t3);margin-bottom:3px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.mv{font-size:13px;font-weight:600;color:var(--t)}
+.ab{background:var(--yb);border:1.5px solid #f6c842;border-radius:var(--rr);padding:11px 14px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start}
+.ai{background:#fff5f5;border:1.5px solid #f1a9a0;border-radius:var(--rr);padding:11px 14px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start}
+.dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0;display:block}
+.si{background:var(--s2);border:1.5px solid var(--b);border-radius:var(--rr);padding:11px 14px;margin-bottom:10px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px}
+.hidden{display:none!important}
+#ls{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:1rem;background:linear-gradient(135deg,var(--gb) 0%,var(--bg) 100%)}
+.lc{background:var(--s);border:1.5px solid var(--b);border-radius:18px;padding:2.5rem 2rem;width:100%;max-width:360px;box-shadow:0 4px 20px rgba(0,0,0,.14)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.5);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+#ld{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center;gap:12px;font-size:14px;color:var(--t2)}
+.pb{width:82px;height:82px;border-radius:50%;border:2px dashed var(--bs);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;flex-shrink:0;background:var(--s2)}
+.pb:hover{border-color:var(--g)}
+.cb{background:var(--gb);border:1.5px solid var(--g);border-radius:var(--rl);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.wa{display:inline-flex;align-items:center;gap:6px;background:#1da851;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;text-decoration:none;margin-top:6px;cursor:pointer}
+.st{font-size:11px;font-weight:700;color:var(--t3);margin-bottom:10px;margin-top:22px;padding-bottom:7px;border-bottom:1.5px solid var(--b);text-transform:uppercase;letter-spacing:.07em}
+.ax{display:flex;align-items:center;justify-content:space-between;background:var(--s2);border:1.5px solid var(--b);border-radius:var(--rr);padding:9px 13px;margin-bottom:6px}
+.tg{border-radius:99px;padding:2px 9px;font-size:12px;display:inline-block;font-weight:500}
+.tgg{background:var(--gb);color:var(--gt);border:1px solid #a8d8c0}
+.tgb{background:var(--bb);color:#1a4f8a;border:1px solid #a8c8f0}
+.tgy{background:var(--yb);color:#7a5800;border:1px solid #f6c842}
+.hr{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px}
+vercel-live-feedback,#__vercel_toolbar,vercel-toolbar,#vercel-live-feedback{display:none!important}
+</style>
+</head>
+<body>
+
+<div id="ld">
+  <div style="width:28px;height:28px;border:3px solid var(--g);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite"></div>
+  Carregando...
+</div>
+
+<div id="ls" class="hidden">
+  <div class="lc">
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="width:58px;height:58px;border-radius:50%;background:var(--g);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;box-shadow:0 4px 12px rgba(19,138,95,.3)">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M9 11.75a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5zm6 0a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8 0-.3.02-.58.05-.87 2.36-1.04 4.23-2.97 5.21-5.36C11.07 8.33 13.05 9.5 15.2 10c.96.23 1.97.32 3 .2.06.26.1.53.12.8H18c0 4.41-3.59 8-6 8z"/></svg>
+      </div>
+      <h1 style="font-size:23px;font-weight:700;color:var(--t)">Salão Pro</h1>
+      <p style="font-size:13px;color:var(--t3);margin-top:4px">Gestão de coloração capilar</p>
+    </div>
+    <div id="fl">
+      <div class="fi"><label>E-mail</label><input id="le" type="email" placeholder="seu@email.com" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+      <div class="fi"><label>Senha</label><input id="lp" type="password" placeholder="Sua senha" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+      <p id="le2" class="hidden" style="font-size:12px;color:var(--r);text-align:center;margin-bottom:8px"></p>
+      <button class="bp" id="blo" style="width:100%;padding:12px 0;font-size:14px" onclick="doLogin()">Entrar</button>
+      <p style="text-align:center;font-size:13px;color:var(--t3);margin-top:16px">Não tem conta? <a href="#" onclick="tf(true)" style="color:var(--g);text-decoration:none;font-weight:600">Cadastrar</a></p>
+    </div>
+    <div id="fr" class="hidden">
+      <div class="fi"><label>Nome completo</label><input id="rn" placeholder="Seu nome"/></div>
+      <div class="fi"><label>E-mail</label><input id="re" type="email" placeholder="seu@email.com"/></div>
+      <div class="fi"><label>Senha</label><input id="rp" type="password" placeholder="Mínimo 6 caracteres"/></div>
+      <div class="fi"><label>Perfil</label>
+        <select id="rr" onchange="tcf()">
+          <option value="aux">Auxiliar</option>
+          <option value="pro">Profissional</option>
+        </select>
+      </div>
+      <div id="cf" class="fi">
+        <label>Código de acesso</label>
+        <input id="rc" placeholder="Cole o código recebido"/>
+        <p style="font-size:11px;color:var(--t3);margin-top:4px">Auxiliar: código da profissional &nbsp;|&nbsp; Profissional: SALAOPRO2025</p>
+      </div>
+      <p id="re2" class="hidden" style="font-size:12px;color:var(--r);text-align:center;margin-bottom:8px"></p>
+      <button class="bp" id="brg" style="width:100%;padding:12px 0;font-size:14px" onclick="doRegister()">Criar conta</button>
+      <p style="text-align:center;font-size:13px;color:var(--t3);margin-top:16px">Já tem conta? <a href="#" onclick="tf(false)" style="color:var(--g);text-decoration:none;font-weight:600">Entrar</a></p>
+    </div>
+  </div>
+</div>
+
+<div id="ms" class="hidden">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="width:36px;height:36px;border-radius:50%;background:var(--g);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(19,138,95,.3)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M9 11.75a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5zm6 0a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8 0-.3.02-.58.05-.87 2.36-1.04 4.23-2.97 5.21-5.36C11.07 8.33 13.05 9.5 15.2 10c.96.23 1.97.32 3 .2.06.26.1.53.12.8H18c0 4.41-3.59 8-6 8z"/></svg>
+      </div>
+      <span style="font-size:17px;font-weight:700;color:var(--t)">Salão Pro</span>
+      <span id="rb2" style="font-size:11px;padding:3px 10px;border-radius:99px;font-weight:600"></span>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="bs" onclick="shareApp()" style="font-size:12px;padding:6px 12px;display:flex;align-items:center;gap:5px">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Compartilhar
+      </button>
+      <button class="bs" onclick="doLogout()" style="font-size:12px;padding:6px 14px">Sair</button>
+    </div>
+  </div>
+  <div class="nav">
+    <button class="active" onclick="showTab('tc',this)">Clientes</button>
+    <button onclick="showTab('ta',this)">Alertas <span id="abg" class="hidden" style="background:var(--r);color:#fff;border-radius:99px;font-size:10px;padding:1px 6px;margin-left:4px"></span></button>
+    <button onclick="showTab('tn',this)">Nova cliente</button>
+    <button onclick="showTab('tco',this)">Cores</button>
+    <button onclick="showTab('ts',this)">Serviços</button>
+    <button onclick="showTab('tcfg',this)">Configurações</button>
+  </div>
+  <div class="content">
+    <div id="tc">
+      <input id="srch" placeholder="🔍 Buscar por nome ou telefone..." oninput="renderClients()" style="margin-bottom:14px"/>
+      <div id="cg" class="grid"></div>
+    </div>
+    <div id="ta" class="hidden"></div>
+    <div id="tn" class="hidden">
+      <p style="font-size:13px;color:var(--t3);margin-bottom:16px;font-weight:500">Cadastrar nova cliente</p>
+      <div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:12px">
+        <div>
+          <div class="pb" onclick="document.getElementById('pi').click()">
+            <img id="pp" src="" class="hidden" style="width:82px;height:82px;object-fit:cover;border-radius:50%"/>
+            <div id="pph" style="display:flex;flex-direction:column;align-items:center">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="#aaa"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+              <p style="font-size:10px;color:#bbb;margin-top:2px">Foto</p>
+            </div>
+          </div>
+          <input type="file" id="pi" accept="image/*" class="hidden" onchange="prevPhoto(this)"/>
+        </div>
+        <div style="flex:1">
+          <div class="g2">
+            <div class="fi"><label>Nome completo</label><input id="nn" placeholder="Nome da cliente" oninput="suggestC(this)"/></div>
+            <div class="fi"><label>Telefone (com DDD)</label><input id="nt" placeholder="11999999999"/></div>
+          </div>
+          <div id="csug" class="hidden" style="background:var(--s);border:1.5px solid var(--b);border-radius:var(--rr);margin-top:-10px;margin-bottom:10px;max-height:150px;overflow-y:auto;position:relative;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,.10)"></div>
+          <div class="g2">
+            <div class="fi"><label>Nascimento</label><input id="nb" type="date"/></div>
+            <div class="fi"><label>E-mail</label><input id="nem" type="email"/></div>
+          </div>
+        </div>
+      </div>
+      <div class="fi"><label>Observações</label><textarea id="no" style="height:70px;resize:vertical" placeholder="Alergias, preferências..."></textarea></div>
+      <button class="bp" style="width:100%;padding:12px 0;font-size:14px" onclick="saveNC()">Cadastrar cliente</button>
+      <p id="nm" class="hidden" style="color:var(--g);font-size:13px;margin-top:10px;font-weight:500"></p>
+    </div>
+    <div id="tco" class="hidden">
+      <p style="font-size:13px;color:var(--t3);margin-bottom:12px;font-weight:500">Cores e produtos do salão</p>
+      <div id="cl"></div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <input id="nc2" placeholder="Nova cor ou produto..." style="flex:1" onkeydown="if(event.key==='Enter')addCor()"/>
+        <button class="bs" onclick="addCor()">Adicionar</button>
+      </div>
+    </div>
+    <div id="ts" class="hidden">
+      <p style="font-size:13px;color:var(--t3);margin-bottom:12px;font-weight:500">Tipos de serviço — defina o prazo de retorno de cada um</p>
+      <div id="sl"></div>
+      <div style="background:var(--s);border:1.5px solid var(--b);border-radius:var(--rl);padding:14px;margin-top:12px">
+        <p style="font-size:13px;font-weight:600;color:var(--t);margin-bottom:10px">Adicionar novo serviço</p>
+        <div class="g2">
+          <div class="fi"><label>Nome do serviço</label><input id="nsn" placeholder="ex: Coloração completa, Mechas..."/></div>
+          <div class="fi"><label>Dias até inatividade</label><input id="nsd" type="number" min="1" max="365" placeholder="ex: 45"/><p style="font-size:11px;color:var(--t3);margin-top:3px">Dias sem visita para alertar</p></div>
+        </div>
+        <button class="bp" onclick="addServico()" style="font-size:13px;padding:9px 18px">Adicionar serviço</button>
+      </div>
+    </div>
+    <div id="tcfg" class="hidden">
+      <p style="font-size:15px;font-weight:700;color:var(--t);margin-bottom:4px">Configurações</p>
+      <div id="poc" class="hidden">
+        <p class="st">Código de acesso para auxiliares</p>
+        <div class="cb">
+          <div>
+            <p style="font-size:11px;color:var(--gt);margin-bottom:6px;font-weight:500">Compartilhe com suas auxiliares para criarem conta</p>
+            <p id="cd" style="font-size:24px;font-weight:700;color:var(--g);letter-spacing:5px">—</p>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <button class="bs" onclick="copyCode()" style="font-size:12px;padding:7px 13px">Copiar</button>
+            <button class="bs" onclick="genCode()" style="font-size:12px;padding:7px 13px">Novo</button>
+          </div>
+        </div>
+        <p class="st">Auxiliares vinculadas</p>
+        <div id="al"><p style="font-size:13px;color:var(--t3)">Carregando...</p></div>
+      </div>
+      <p class="st">Mensagem de reativação (WhatsApp)</p>
+      <p style="font-size:12px;color:var(--t3);margin-bottom:8px">Use <b>{nome}</b> para o nome da cliente e <b>{dias}</b> para os dias sem visita.</p>
+      <div class="fi"><textarea id="wmi" style="height:100px;resize:vertical"></textarea></div>
+      <button class="bp" onclick="saveWaMsg()" style="font-size:13px;padding:9px 18px">Salvar mensagem</button>
+      <p id="wms" class="hidden" style="color:var(--g);font-size:12px;margin-top:8px;font-weight:500">✓ Mensagem salva!</p>
+      <p class="st">Compartilhar app</p>
+      <button class="bp" onclick="shareApp()" style="font-size:13px;padding:9px 18px;display:inline-flex;align-items:center;gap:6px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Compartilhar link
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="mc" class="ov hidden" onclick="if(event.target===this)cm('mc')">
+  <div class="modal"><div id="mcb"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;flex-wrap:wrap">
+      <button class="bs" onclick="cm('mc')">Fechar</button>
+      <button class="bs" onclick="openEdit()">✏️ Editar</button>
+      <button class="bp" id="bas" onclick="openSession()">+ Sessão</button>
+    </div>
+  </div>
+</div>
+
+<div id="mec" class="ov hidden" onclick="if(event.target===this)cm('mec')">
+  <div class="modal">
+    <h3 style="font-size:16px;font-weight:600;margin-bottom:16px">Editar cadastro</h3>
+    <div class="g2">
+      <div class="fi"><label>Nome</label><input id="en"/></div>
+      <div class="fi"><label>Telefone</label><input id="et"/></div>
+    </div>
+    <div class="g2">
+      <div class="fi"><label>Nascimento</label><input id="eb" type="date"/></div>
+      <div class="fi"><label>E-mail</label><input id="ee" type="email"/></div>
+    </div>
+    <div class="fi"><label>Observações</label><textarea id="eo" style="height:70px;resize:vertical"></textarea></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
+      <button class="bs" onclick="cm('mec')">Cancelar</button>
+      <button class="bp" onclick="saveEdit()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div id="mss" class="ov hidden" onclick="if(event.target===this)cm('mss')">
+  <div class="modal">
+    <h3 style="font-size:16px;font-weight:600;margin-bottom:16px">Registrar sessão</h3>
+    <div class="g2">
+      <div class="fi"><label>Data</label><input id="sd" type="date"/></div>
+      <div class="fi"><label>Serviço</label><select id="ssv"><option value="">Selecione...</option></select></div>
+    </div>
+    <div class="fi"><label>Cores / Tintas</label>
+      <div style="border:1.5px solid var(--b);border-radius:var(--rr);padding:12px;background:var(--s2)">
+        <div id="st2" style="display:flex;flex-wrap:wrap;gap:5px;min-height:28px;margin-bottom:10px"></div>
+        <div class="g3" style="align-items:end">
+          <div><label style="font-size:11px;color:var(--t3);margin-bottom:3px;display:block;font-weight:500">Cor / Produto</label><input id="sci" list="cl2" placeholder="Nome da cor..." style="font-size:13px"/><datalist id="cl2"></datalist></div>
+          <div><label style="font-size:11px;color:var(--t3);margin-bottom:3px;display:block;font-weight:500">Quantidade</label><input id="scq" placeholder="ex: 60g" style="font-size:13px"/></div>
+          <div style="display:flex;align-items:flex-end"><button class="bs" onclick="addSC()" style="width:100%;font-size:12px;padding:9px 0">+ Cor</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="fi"><label>Oxidante(s)</label>
+      <div style="border:1.5px solid var(--b);border-radius:var(--rr);padding:12px;background:var(--s2)">
+        <div id="ot" style="display:flex;flex-wrap:wrap;gap:5px;min-height:28px;margin-bottom:10px"></div>
+        <div class="g4" style="align-items:end">
+          <div><label style="font-size:11px;color:var(--t3);margin-bottom:3px;display:block;font-weight:500">Oxidante</label><select id="on2" style="font-size:13px"><option value="">Sel...</option><option>Ox 10vol</option><option>Ox 20vol</option><option>Ox 30vol</option><option>Ox 40vol</option><option>Outro</option></select></div>
+          <div><label style="font-size:11px;color:var(--t3);margin-bottom:3px;display:block;font-weight:500">Volumagem</label><input id="ov2" placeholder="30" style="font-size:13px"/></div>
+          <div><label style="font-size:11px;color:var(--t3);margin-bottom:3px;display:block;font-weight:500">Qtd</label><input id="oq" placeholder="60ml" style="font-size:13px"/></div>
+          <div style="display:flex;align-items:flex-end"><button class="bs" onclick="addOx()" style="width:100%;font-size:12px;padding:9px 0">+ Ox</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="fi"><label>Tempo de pausa (min)</label><input id="sp" type="number" min="0" max="180" placeholder="ex: 35"/></div>
+    <div class="fi"><label>Observações</label><textarea id="sn" style="height:70px;resize:vertical" placeholder="Técnica, resultado..."></textarea></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
+      <button class="bs" onclick="cm('mss')">Cancelar</button>
+      <button class="bp" onclick="saveSess()">Salvar sessão</button>
+    </div>
+  </div>
+</div>
+
+<div id="md" class="ov hidden" onclick="if(event.target===this)cm('md')">
+  <div class="modal" style="max-width:360px">
+    <h3 style="font-size:16px;font-weight:600;margin-bottom:16px">Alterar data da última visita</h3>
+    <div class="fi"><label>Nova data</label><input id="nvd" type="date"/></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
+      <button class="bs" onclick="cm('md')">Cancelar</button>
+      <button class="bp" onclick="saveDate()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div id="mh" class="ov hidden" onclick="if(event.target===this)cm('mh')">
+  <div class="modal">
+    <h3 style="font-size:16px;font-weight:600;margin-bottom:4px" id="ht">Histórico completo</h3>
+    <p style="font-size:12px;color:var(--t3);margin-bottom:14px">Todas as sessões da cliente</p>
+    <div id="hb"></div>
+    <div style="display:flex;justify-content:flex-end;margin-top:16px"><button class="bs" onclick="cm('mh')">Fechar</button></div>
+  </div>
+</div>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import{getFirestore,collection,doc,addDoc,updateDoc,onSnapshot,setDoc,getDoc,getDocs}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const cfg={apiKey:"AIzaSyD7iOpPes0e60ColfnhulRkg-QKHlDg-iY",authDomain:"salao-pro-17519.firebaseapp.com",projectId:"salao-pro-17519",storageBucket:"salao-pro-17519.firebasestorage.app",messagingSenderId:"771780855688",appId:"1:771780855688:web:5cc873be37269a7d379c3d"};
+const PC="SALAOPRO2025";
+const fb=initializeApp(cfg);const auth=getAuth(fb);const db=getFirestore(fb);
+const PL=["#9FE1CB","#B5D4F4","#F5C4B3","#FAC775","#C0DD97","#F4C0D1","#CECBF6","#D3D1C7"];
+const ps=n=>{const bg=PL[(n||"x").length%PL.length];return`background:${bg}55;color:#1a2a1a;border:1.5px solid ${bg};border-radius:99px;padding:2px 10px;font-size:12px;display:inline-block;font-weight:500`;};
+const avB=n=>PL[(n||"A").charCodeAt(0)%PL.length];
+const ini=n=>{const p=(n||"?").trim().split(" ");return p.length>=2?p[0][0]+p[1][0]:p[0].slice(0,2);};
+const ts=()=>new Date().toISOString().split("T")[0];
+const db2=(d1,d2)=>Math.floor((new Date(d2)-new Date(d1))/86400000);
+const fm=d=>{if(!d)return"—";const[y,m,dd]=d.split("-");return`${dd}/${m}/${y}`;};
+const isBd=n=>{if(!n)return false;const d=new Date(n+"T00:00:00"),t=new Date();return d.getDate()===t.getDate()&&d.getMonth()===t.getMonth();};
+const lS=c=>c.sessions&&c.sessions.length?[...c.sessions].sort((a,b)=>b.date.localeCompare(a.date))[0]:null;
+const $=id=>document.getElementById(id);
+const ct=t=>(t||"").replace(/\D/g,"");
+const DW="Olá {nome}! 😊 Faz {dias} dias desde sua última visita. Que tal agendar? 💇‍♀️";
+let cU=null,cR=null,clients=[],catalog=[],svcs=[],selC=null,sCols=[],sOxs=[],axCode="",ph64=null,waMsg=DW,uC=null,uK=null,uS=null,contacts=[];
+
+onAuthStateChanged(auth,async fu=>{
+  if(fu){const sn=await getDoc(doc(db,"users",fu.uid));if(sn.exists()&&sn.data().active!==false){cU=fu;cR=sn.data().role;showApp();}else{await signOut(auth);showL();}}
+  else showL();
+});
+
+function showL(){$("ld").classList.add("hidden");$("ms").classList.add("hidden");$("ls").classList.remove("hidden");}
+function showApp(){
+  $("ld").classList.add("hidden");$("ls").classList.add("hidden");$("ms").classList.remove("hidden");
+  const ip=cR==="pro";
+  const b=$("rb2");b.textContent=ip?"Profissional":"Auxiliar";b.style.background=ip?"var(--gb)":"var(--bb)";b.style.color=ip?"var(--gt)":"#1a4f8a";
+  if(ip){$("poc").classList.remove("hidden");loadCode();loadAux();}
+  loadWa();subData();if(ip)reqContacts();
+}
+window.tf=r=>{$("fl").classList.toggle("hidden",r);$("fr").classList.toggle("hidden",!r);};
+window.tcf=()=>{$("rc").placeholder=$("rr").value==="aux"?"Cole o código da profissional":"SALAOPRO2025";};
+
+window.doLogin=async()=>{
+  const e=$("le").value.trim(),p=$("lp").value,err=$("le2"),btn=$("blo");
+  if(!e||!p){err.textContent="Preencha e-mail e senha";err.classList.remove("hidden");return;}
+  btn.innerHTML='<span class="spin"></span>Entrando...';btn.disabled=true;
+  try{await signInWithEmailAndPassword(auth,e,p);err.classList.add("hidden");}
+  catch(ex){err.textContent=ex.code==="auth/invalid-credential"?"E-mail ou senha incorretos":"Erro ao entrar.";err.classList.remove("hidden");}
+  btn.innerHTML="Entrar";btn.disabled=false;
+};
+window.doRegister=async()=>{
+  const n=$("rn").value.trim(),e=$("re").value.trim(),p=$("rp").value,ro=$("rr").value,c=$("rc").value.trim().toUpperCase(),err=$("re2"),btn=$("brg");
+  if(!n||!e||!p){err.textContent="Preencha todos os campos";err.classList.remove("hidden");return;}
+  if(p.length<6){err.textContent="Senha deve ter ao menos 6 caracteres";err.classList.remove("hidden");return;}
+  if(ro==="aux"){const sn=await getDoc(doc(db,"settings","auxCode"));if(!sn.exists()||c!==sn.data().code){err.textContent="Código inválido.";err.classList.remove("hidden");return;}}
+  if(ro==="pro"&&c!==PC){err.textContent="Código de profissional inválido.";err.classList.remove("hidden");return;}
+  btn.innerHTML='<span class="spin"></span>Criando...';btn.disabled=true;
+  try{const cr=await createUserWithEmailAndPassword(auth,e,p);await setDoc(doc(db,"users",cr.user.uid),{nome:n,email:e,role:ro,active:true});err.classList.add("hidden");}
+  catch(ex){err.textContent=ex.code==="auth/email-already-in-use"?"E-mail já cadastrado":"Erro ao criar conta.";err.classList.remove("hidden");}
+  btn.innerHTML="Criar conta";btn.disabled=false;
+};
+window.doLogout=async()=>{if(uC)uC();if(uK)uK();if(uS)uS();await signOut(auth);};
+
+async function reqContacts(){
+  if("contacts" in navigator&&"ContactsManager" in window){
+    try{contacts=await navigator.contacts.select(["name","tel"],{multiple:true})||[];}catch{}
+  }
+}
+window.suggestC=inp=>{
+  const q=inp.value.trim().toLowerCase(),box=$("csug");
+  if(!q||!contacts.length){box.classList.add("hidden");return;}
+  const m=contacts.filter(c=>(c.name||[]).join("").toLowerCase().includes(q)).slice(0,5);
+  if(!m.length){box.classList.add("hidden");return;}
+  box.classList.remove("hidden");
+  box.innerHTML=m.map(c=>{const nm=(c.name||[""])[0],tl=(c.tel||[""])[0];
+    return`<div onclick="fillC('${nm.replace(/'/g,"\\'")}','${tl.replace(/'/g,"\\'")}'')" style="padding:9px 13px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--b);color:var(--t)">${nm}<span style="color:var(--t3);font-size:12px;margin-left:8px">${tl}</span></div>`;
+  }).join("");
+};
+window.fillC=(n,t)=>{$("nn").value=n;$("nt").value=t;$("csug").classList.add("hidden");};
+
+async function loadCode(){const sn=await getDoc(doc(db,"settings","auxCode"));if(sn.exists()){axCode=sn.data().code;$("cd").textContent=axCode;}else genCode();}
+window.genCode=async()=>{const ch="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let c="";for(let i=0;i<8;i++)c+=ch[Math.floor(Math.random()*ch.length)];await setDoc(doc(db,"settings","auxCode"),{code:c});axCode=c;$("cd").textContent=c;};
+window.copyCode=()=>navigator.clipboard.writeText(axCode).then(()=>alert("Código copiado!"));
+
+async function loadAux(){
+  const snap=await getDocs(collection(db,"users"));
+  const ax=snap.docs.filter(d=>d.data().role==="aux"&&d.data().active!==false);
+  const box=$("al");
+  if(!ax.length){box.innerHTML='<p style="font-size:13px;color:var(--t3)">Nenhuma auxiliar vinculada.</p>';return;}
+  box.innerHTML=ax.map(d=>`<div class="ax"><div><p style="font-size:13px;font-weight:600">${d.data().nome}</p><p style="font-size:12px;color:var(--t3)">${d.data().email}</p></div><button class="bd" onclick="desvAux('${d.id}','${d.data().nome}')">Desvincular</button></div>`).join("");
+}
+window.desvAux=async(uid,n)=>{if(!confirm(`Desvincular ${n}?`))return;await updateDoc(doc(db,"users",uid),{active:false,role:"revoked"});alert(`${n} desvinculada.`);loadAux();};
+
+async function loadWa(){const sn=await getDoc(doc(db,"settings","waMsg"));waMsg=sn.exists()?sn.data().msg:DW;$("wmi").value=waMsg;}
+window.saveWaMsg=async()=>{
+  const m=$("wmi").value.trim();if(!m)return;
+  waMsg=m;await setDoc(doc(db,"settings","waMsg"),{msg:m});
+  const s=$("wms");s.classList.remove("hidden");setTimeout(()=>s.classList.add("hidden"),2500);
+  renderAlerts();
+};
+window.shareApp=async()=>{const u=window.location.origin+window.location.pathname;if(navigator.share){try{await navigator.share({title:"Salão Pro",text:"Acesse o app:",url:u});}catch{}}else{await navigator.clipboard.writeText(u);alert("Link copiado!");}};
+
+function subData(){
+  uC=onSnapshot(collection(db,"clients"),sn=>{clients=sn.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>a.nome.localeCompare(b.nome,"pt-BR"));renderClients();renderAlerts();});
+  uK=onSnapshot(doc(db,"catalog","items"),sn=>{catalog=sn.exists()?(sn.data().list||[]):[];rCores();uCat();});
+  uS=onSnapshot(doc(db,"catalog","servicos"),sn=>{svcs=sn.exists()?(sn.data().list||[]):[];rSvcs();uSvcs();});
+}
+window.showTab=(id,btn)=>{["tc","ta","tn","tco","ts","tcfg"].forEach(t=>$(t).classList.add("hidden"));document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));$(id).classList.remove("hidden");btn.classList.add("active");};
+
+window.prevPhoto=inp=>{const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{ph64=e.target.result;$("pp").src=ph64;$("pp").classList.remove("hidden");$("pph").style.display="none";};r.readAsDataURL(f);};
+
+function gIT(c){const l=lS(c);if(!l||!l.servico)return 30;const sv=svcs.find(s=>s.nome===l.servico);return sv&&sv.dias?parseInt(sv.dias):30;}
+
+window.renderClients=()=>{
+  const q=($("srch").value||"").toLowerCase(),g=$("cg");
+  const fl=clients.filter(c=>c.nome.toLowerCase().includes(q)||(c.tel||"").includes(q));
+  if(!fl.length){g.innerHTML='<p style="text-align:center;color:var(--t3);padding:3rem 0;font-size:13px">Nenhuma cliente encontrada</p>';return;}
+  g.innerHTML=fl.map(c=>{
+    const l=lS(c),dy=l?db2(l.date,ts()):999,th=gIT(c),ina=dy>=th,bd=isBd(c.nasc);
+    const bl=ina?"3px solid var(--r)":bd?"3px solid #f6c842":"1.5px solid var(--b)";
+    const bc=ina?"#f1a9a0":bd?"#f6c842":"var(--b)";
+    const pi=(l?(l.colors||[]).slice(0,3):[]).map(col=>`<span style="${ps(col.name||col)}">${col.name||col}</span>`).join("");
+    const av=c.photo?`<img src="${c.photo}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0"/>`:`<div style="width:40px;height:40px;border-radius:50%;background:${avB(c.nome)}55;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#1a2a1a;flex-shrink:0">${ini(c.nome)}</div>`;
+    return`<div class="card" style="border:1.5px solid ${bc};border-left:${bl}" onclick="openC('${c.id}')">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">${av}<div><div style="font-size:14px;font-weight:600;color:var(--t)">${c.nome}</div><div style="font-size:12px;color:var(--t3)">${c.tel||""}</div></div></div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">${pi}</div>
+      <div style="font-size:11px;color:var(--t3);font-weight:500">${l?`Última visita: ${fm(l.date)} · ${dy} dias`:"Sem sessões"}</div>
+    </div>`;
+  }).join("");
+};
+
+window.renderAlerts=()=>{
+  const td=ts(),bd=clients.filter(c=>isBd(c.nasc));
+  const ia=clients.filter(c=>{const l=lS(c);if(!l)return true;return db2(l.date,td)>=gIT(c);});
+  const cnt=bd.length+ia.length,bag=$("abg");
+  cnt>0?(bag.textContent=cnt,bag.classList.remove("hidden")):bag.classList.add("hidden");
+  let h="";
+  if(!bd.length&&!ia.length)h='<p style="text-align:center;color:var(--t3);padding:3rem 0;font-size:13px">✓ Nenhum alerta no momento</p>';
+  if(bd.length){
+    h+=`<p style="font-size:12px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Aniversariantes hoje</p>`;
+    h+=bd.map(c=>`<div class="ab"><div class="dot" style="background:#c8900a"></div><div><b style="color:#7a5800;font-size:13px">${c.nome}</b><br><span style="font-size:12px;color:#9a6f00">Aniversário hoje — ${fm(c.nasc)}</span></div></div>`).join("");
+  }
+  if(ia.length){
+    h+=`<p style="font-size:12px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;margin-top:${bd.length?18:0}px">Clientes inativas</p>`;
+    h+=ia.map(c=>{
+      const l=lS(c),dy=l?db2(l.date,td):null,tl=ct(c.tel),th=gIT(c);
+      const fn=c.nome.split(" ")[0];
+      const mt=(waMsg||DW).replace(/\{nome\}/g,fn).replace(/\{dias\}/g,dy||"?");
+      const wa=tl?`<a href="https://wa.me/55${tl}?text=${encodeURIComponent(mt)}" target="_blank" class="wa"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.109.549 4.09 1.504 5.813L.057 23.057l5.408-1.418A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.809 9.809 0 0 1-5.002-1.368l-.359-.214-3.21.842.857-3.131-.234-.372A9.818 9.818 0 0 1 2.182 12c0-5.42 4.398-9.818 9.818-9.818 5.42 0 9.818 4.398 9.818 9.818 0 5.42-4.398 9.818-9.818 9.818z"/></svg>Enviar WhatsApp</a>`:
+      `<span style="font-size:11px;color:var(--t3)">Sem telefone</span>`;
+      return`<div class="ai"><div class="dot" style="background:var(--r)"></div><div style="flex:1"><b style="color:#5a1010;font-size:13px">${c.nome}</b><br><span style="font-size:12px;color:#7a1a1a">Última visita: ${l?fm(l.date):"nunca"}${dy!==null?` · ${dy} dias (limite: ${th}d)`:""}</span><div style="margin-top:6px">${wa}</div></div></div>`;
+    }).join("");
+  }
+  $("ta").innerHTML=h;
+};
+
+window.rCores=()=>{$("cl").innerHTML=catalog.map((cor,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;background:var(--s2);border:1.5px solid var(--b);border-radius:var(--rr);padding:8px 12px;margin-bottom:5px"><span style="${ps(cor)}">${cor}</span><button class="bd" onclick="rmCor(${i})">Remover</button></div>`).join("");};
+window.addCor=async()=>{const v=$("nc2").value.trim();if(!v||catalog.includes(v))return;await setDoc(doc(db,"catalog","items"),{list:[...catalog,v]});$("nc2").value="";};
+window.rmCor=async i=>{await setDoc(doc(db,"catalog","items"),{list:catalog.filter((_,j)=>j!==i)});};
+window.uCat=()=>{$("cl2").innerHTML=catalog.map(c=>`<option value="${c}">`).join("");};
+
+window.rSvcs=()=>{$("sl").innerHTML=svcs.length?svcs.map((s,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;background:var(--s);border:1.5px solid var(--b);border-radius:var(--rr);padding:10px 14px;margin-bottom:6px"><div><span style="font-size:13px;font-weight:600">${s.nome}</span><span style="font-size:12px;color:var(--t3);margin-left:8px">⏰ inativo após ${s.dias||30} dias</span></div><button class="bd" onclick="rmSvc(${i})">Remover</button></div>`).join(""):'<p style="font-size:13px;color:var(--t3);padding:1rem 0">Nenhum serviço cadastrado.</p>';};
+window.addServico=async()=>{const n=$("nsn").value.trim(),d=$("nsd").value.trim()||"30";if(!n)return;if(svcs.find(s=>s.nome===n)){alert("Serviço já cadastrado");return;}await setDoc(doc(db,"catalog","servicos"),{list:[...svcs,{nome:n,dias:d}]});$("nsn").value="";$("nsd").value="";};
+window.rmSvc=async i=>{await setDoc(doc(db,"catalog","servicos"),{list:svcs.filter((_,j)=>j!==i)});};
+window.uSvcs=()=>{const s=$("ssv"),c=s.value;s.innerHTML='<option value="">Selecione...</option>'+svcs.map(sv=>`<option value="${sv.nome}">${sv.nome} (${sv.dias||30}d)</option>`).join("");if(c)s.value=c;};
+
+window.openC=id=>{
+  selC=clients.find(c=>c.id===id);if(!selC)return;
+  const l=lS(selC),dy=l?db2(l.date,ts()):null;
+  const ac=[...new Set((selC.sessions||[]).flatMap(s=>(s.colors||[]).map(c=>c.name||c)))];
+  const bb=isBd(selC.nasc)?`<span class="tg tgy" style="margin-left:8px">🎂 Aniversário hoje!</span>`:"";
+  const av=selC.photo?`<img src="${selC.photo}" style="width:58px;height:58px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid var(--b)"/>`:`<div style="width:58px;height:58px;border-radius:50%;background:${avB(selC.nome)}55;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:21px;color:#1a2a1a;flex-shrink:0">${ini(selC.nome)}</div>`;
+  const sc={};(selC.sessions||[]).forEach(s=>{if(s.servico)sc[s.servico]=(sc[s.servico]||0)+1;});
+  const ss=Object.entries(sc).map(([k,v])=>`<span class="tg tgb">${k} <b>(${v}x)</b></span>`).join(" ");
+  const hist=[...(selC.sessions||[])].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5).map(s=>sessHtml(s)).join("");
+  const tot=(selC.sessions||[]).length;
+  $("mcb").innerHTML=`
+    <div style="display:flex;align-items:center;gap:13px;margin-bottom:16px">${av}
+      <div><h3 style="font-size:18px;font-weight:700;margin:0;display:flex;align-items:center;flex-wrap:wrap;gap:6px">${selC.nome}${bb}</h3>
+      <p style="font-size:13px;color:var(--t3);margin:2px 0 0">${selC.tel||""}${selC.email?" · "+selC.email:""}</p></div>
+    </div>
+    <div class="g2" style="margin-bottom:10px">
+      <div class="mb"><div class="ml">Nascimento</div><div class="mv">${selC.nasc?fm(selC.nasc):"—"}</div></div>
+      <div class="mb"><div class="ml">Última sessão</div><div class="mv">${l?`${fm(l.date)} (${dy}d)`:"Sem sessões"}</div>
+      <button onclick="openDate()" style="font-size:11px;color:var(--g);background:none;border:none;padding:0;margin-top:4px;cursor:pointer;font-weight:600">Alterar data</button></div>
+    </div>
+    ${selC.obs?`<div style="background:var(--yb);border:1px solid #f6c842;border-radius:var(--rr);padding:8px 12px;margin-bottom:12px;font-size:12px;color:#7a5800">📋 ${selC.obs}</div>`:""}
+    ${ss?`<div style="margin-bottom:12px"><p style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Serviços realizados</p><div style="display:flex;flex-wrap:wrap;gap:5px">${ss}</div></div>`:""}
+    ${ac.length?`<p style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Cores já utilizadas</p><div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:14px">${ac.map(c=>`<span style="${ps(c)}">${c}</span>`).join("")}</div>`:""}
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <p style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.05em">Últimas sessões</p>
+      ${tot>5?`<button onclick="openHist()" style="font-size:12px;color:var(--g);background:none;border:none;cursor:pointer;font-weight:600">Ver todas (${tot})</button>`:""}
+    </div>
+    ${hist||'<p style="font-size:13px;color:var(--t3)">Sem sessões registradas</p>'}`;
+  $("mc").classList.remove("hidden");
+};
+
+function sessHtml(s){
+  const ct=(s.colors||[]).map(c=>`<span style="${ps(c.name||c)}">${c.name||c}${c.qty?" · "+c.qty:""}</span>`).join("");
+  const ox=(s.oxidantes||[]).map(o=>`<span class="tg tgb">${o.nome}${o.volume?" · "+o.volume+"vol":""}${o.qty?" · "+o.qty:""}</span>`).join(" ");
+  const pa=s.pausa?`<span class="tg tgy">⏱ ${s.pausa} min</span>`:"";
+  const sv=s.servico?`<span class="tg tgg">🔧 ${s.servico}</span>`:"";
+  return`<div class="si"><div class="hr"><span style="font-size:13px;font-weight:700">${fm(s.date)}</span><div style="display:flex;gap:4px;flex-wrap:wrap">${sv}${pa}</div></div><div style="display:flex;flex-wrap:wrap;gap:4px;margin:5px 0">${ct}</div>${ox?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px">${ox}</div>`:""}${s.notes?`<p style="font-size:12px;color:var(--t3);margin:4px 0 0">${s.notes}</p>`:""}</div>`;
+}
+
+window.openHist=()=>{$("ht").textContent=`Histórico — ${selC.nome}`;$("hb").innerHTML=[...(selC.sessions||[])].sort((a,b)=>b.date.localeCompare(a.date)).map(s=>sessHtml(s)).join("");$("mh").classList.remove("hidden");};
+window.cm=id=>$(id).classList.add("hidden");
+window.openEdit=()=>{if(!selC)return;$("en").value=selC.nome||"";$("et").value=selC.tel||"";$("eb").value=selC.nasc||"";$("ee").value=selC.email||"";$("eo").value=selC.obs||"";$("mec").classList.remove("hidden");};
+window.saveEdit=async()=>{const n=$("en").value.trim(),t=$("et").value.trim();if(!n||!t){alert("Nome e telefone obrigatórios");return;}await updateDoc(doc(db,"clients",selC.id),{nome:n,tel:t,nasc:$("eb").value,email:$("ee").value.trim(),obs:$("eo").value.trim()});cm("mec");cm("mc");};
+window.openDate=()=>{const l=lS(selC);$("nvd").value=l?l.date:ts();$("md").classList.remove("hidden");};
+window.saveDate=async()=>{const nd=$("nvd").value;if(!nd)return;const ss=[...(selC.sessions||[])];if(ss.length>0){const sr=[...ss].sort((a,b)=>b.date.localeCompare(a.date));sr[0].date=nd;await updateDoc(doc(db,"clients",selC.id),{sessions:sr});}else{await updateDoc(doc(db,"clients",selC.id),{sessions:[{date:nd,colors:[],oxidantes:[],notes:"Visita registrada",pausa:"",servico:""}]});}cm("md");cm("mc");};
+
+window.openSession=()=>{$("sd").value=ts();$("sn").value="";$("sci").value="";$("scq").value="";$("on2").value="";$("ov2").value="";$("oq").value="";$("sp").value="";$("ssv").value="";sCols=[];sOxs=[];rST();rOT();$("mss").classList.remove("hidden");};
+window.addSC=()=>{const n=$("sci").value.trim(),q=$("scq").value.trim();if(!n)return;sCols.push({name:n,qty:q});$("sci").value="";$("scq").value="";rST();};
+window.rmSC=i=>{sCols.splice(i,1);rST();};
+window.rST=()=>{$("st2").innerHTML=sCols.map((c,i)=>`<span style="${ps(c.name)};display:inline-flex;align-items:center;gap:4px">${c.name}${c.qty?" · "+c.qty:""}<button onclick="rmSC(${i})" style="background:none;border:none;cursor:pointer;font-size:15px;padding:0;color:#888">×</button></span>`).join("");};
+window.addOx=()=>{const n=$("on2").value,v=$("ov2").value.trim(),q=$("oq").value.trim();if(!n){alert("Selecione o oxidante");return;}sOxs.push({nome:n,volume:v,qty:q});$("on2").value="";$("ov2").value="";$("oq").value="";rOT();};
+window.rmOx=i=>{sOxs.splice(i,1);rOT();};
+window.rOT=()=>{$("ot").innerHTML=sOxs.map((o,i)=>`<span class="tg tgb" style="display:inline-flex;align-items:center;gap:4px">${o.nome}${o.volume?" · "+o.volume+"vol":""}${o.qty?" · "+o.qty:""}<button onclick="rmOx(${i})" style="background:none;border:none;cursor:pointer;font-size:14px;padding:0;color:#888">×</button></span>`).join("");};
+window.saveSess=async()=>{const d=$("sd").value,n=$("sn").value.trim(),p=$("sp").value.trim(),sv=$("ssv").value;if(!d||!sCols.length){alert("Informe a data e ao menos uma cor");return;}await updateDoc(doc(db,"clients",selC.id),{sessions:[...(selC.sessions||[]),{date:d,colors:[...sCols],oxidantes:[...sOxs],notes:n,pausa:p,servico:sv}]});cm("mss");cm("mc");};
+
+window.saveNC=async()=>{
+  const n=$("nn").value.trim(),t=$("nt").value.trim(),b=$("nb").value,e=$("nem").value.trim(),o=$("no").value.trim();
+  if(!n||!t){alert("Nome e telefone obrigatórios");return;}
+  const data={nome:n,tel:t,nasc:b,email:e,obs:o,sessions:[]};if(ph64)data.photo=ph64;
+  await addDoc(collection(db,"clients"),data);
+  ["nn","nt","nb","nem","no"].forEach(id=>$(id).value="");
+  ph64=null;$("pp").classList.add("hidden");$("pph").style.display="flex";
+  const m=$("nm");m.textContent=`✓ "${n}" cadastrada!`;m.classList.remove("hidden");setTimeout(()=>m.classList.add("hidden"),3000);
+};
+</script>
+<script>
+const hv=()=>{['vercel-live-feedback','vercel-toolbar','#__vercel_toolbar'].forEach(s=>{const el=document.querySelector(s);if(el)el.remove();});};
+hv();setInterval(hv,1000);
+</script>
+</body>
+</html>
